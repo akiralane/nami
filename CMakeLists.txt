@@ -9,11 +9,9 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(lib/glm)
-
 add_executable(nami
         src/main.cpp
-        src/glad.c
+        lib/glad/glad.c
 )
 
-target_link_libraries(nami ${GLFW_LIBRARIES} glm)
+target_link_libraries(nami ${GLFW_LIBRARIES})
