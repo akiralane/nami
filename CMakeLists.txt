@@ -7,9 +7,8 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-include_directories(${PROJECT_SOURCE_DIR}/includes)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(lib/glfw-3.3.4)
 add_subdirectory(lib/glm)
 
 add_executable(nami
@@ -17,4 +16,4 @@ add_executable(nami
         src/glad.c
 )
 
-target_link_libraries(nami glfw ${GLFW_LIBRARIES} glad glm)
+target_link_libraries(nami ${GLFW_LIBRARIES} glm)
