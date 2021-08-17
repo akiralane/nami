@@ -140,12 +140,22 @@ namespace Graphics {
 
         while (!glfwWindowShouldClose(window)) {
 
+            glClearColor(0.2, 0.3, 0.3, 1.0);
             glClear(GL_COLOR_BUFFER_BIT);
 
             glUseProgram(shaderProgram);
             glBindVertexArray(vao);
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            // send the matrices to the vertex shader
+            unsigned int modelLoc = glGetUniformLocation(shaderProgram, "modelMat");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
+            unsigned int viewLoc = glGetUniformLocation(shaderProgram, "viewMat");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
+            unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projectionMat");
+            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+            // draw the rectangle
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
