@@ -3,14 +3,17 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <cstdio>
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <sstream>
+#include <fstream>
 
 namespace Graphics {
-
-    void error_callback(int error, const char* desc);
-    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
     /**
      * Sets up GLFW and GLAD, creating a new window

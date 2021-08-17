@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 project(nami)
 
-include(FetchContent)
-
 set(CMAKE_CXX_STANDARD 20)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

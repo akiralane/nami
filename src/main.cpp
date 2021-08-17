@@ -10,3 +10,4 @@ int main() {
     Graphics::start_render_loop(window);
 
 }
+
