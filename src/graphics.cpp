@@ -1,9 +1,16 @@
-#include "nami/Graphics.h"
+#include "nami/graphics.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image/stb_image.h>
+
 
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
 const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 
-namespace Graphics {
+//const unsigned int DEFAULT_WINDOW_WIDTH = 800;
+//const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
+
+namespace graphics {
 
     namespace {
         void error_callback(int error, const char *desc) {
@@ -21,7 +28,7 @@ namespace Graphics {
             glViewport(0, 0, width, height);
         }
 
-        char* read_shader_source(const std::string path) {
+        char* read_shader_source(const std::string& path) {
             std::stringstream content;
             std::ifstream source (path);
 
@@ -52,24 +59,48 @@ namespace Graphics {
 
             glDeleteShader(vertexShader);
             glDeleteShader(fragmentShader);
+        }
+
+        void generate_texture(unsigned int &texture) {
+
+            // texture parameters for this texture
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            int width, height, nrChannels;
+            unsigned char *data = stbi_load("..\\assets\\water.bmp", &width, &height, &nrChannels, 0);
+
+            if (!data) { fprintf(stderr, "couldn't load texture!"); }
+
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+
+            stbi_image_free(data);
 
         }
 
-        void generate_vao(unsigned int &vao) {
+        void generate_model(unsigned int &vao, unsigned int &texture) {
 
             // the element buffer object stores indices that OpenGL uses to decide which vertices to draw
             // see "indexed drawing" below
             unsigned int vbo, ebo;
 
             float vertices[] = {
-                    0.5f,  0.5f, 0.0f,  // top right
-                    0.5f, -0.5f, 0.0f,  // bottom right
-                    -0.5f, -0.5f, 0.0f,  // bottom left
-                    -0.5f,  0.5f, 0.0f   // top left
+                    // vertex positions     // texture coords
+                     0.5f,  0.5f,  0.0f,    1.0f, 1.0f,  // top right
+                     0.5f, -0.5f,  0.0f,    1.0f, 0.0f,  // bottom right
+                    -0.5f, -0.5f,  0.0f,    0.0f, 0.0f,  // bottom left
+                    -0.5f,  0.5f,  0.0f,    0.0f, 1.0f   // top left
             };
 
             // indexed drawing - the rectangle's triangles have some overlapping vertices,
-            // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again
+            // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
+            // this is significantly more important when models become more complicated than two triangles
             unsigned int indices[] = {
                     0, 1, 3,  // first triangle
                     1, 2, 3   // second triangle
@@ -87,8 +118,16 @@ namespace Graphics {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), nullptr);
-            glEnableVertexAttribArray(0);
+            generate_texture(texture);
+
+            // remember that the attribute stride has to be 5*sizeof(float) because we added the texture coordinates
+            // (so that's the 3 from the 3d vertex positions plus the 2 from the 2d texture coords)
+            // it's easier to see if you just look at the vertices array
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
+            glEnableVertexAttribArray(0); // vertex positions
+
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
+            glEnableVertexAttribArray(1); // texture coordinates
 
         }
     }
@@ -135,8 +174,8 @@ namespace Graphics {
         unsigned int shaderProgram;
         generate_shader_program(shaderProgram);
 
-        unsigned int vao;
-        generate_vao(vao);
+        unsigned int vao, texture;
+        generate_model(vao, texture);
 
         while (!glfwWindowShouldClose(window)) {
 
@@ -145,6 +184,7 @@ namespace Graphics {
 
             glUseProgram(shaderProgram);
             glBindVertexArray(vao);
+            glBindTexture(GL_TEXTURE_2D, texture);
 
             // send the matrices to the vertex shader
             unsigned int modelLoc = glGetUniformLocation(shaderProgram, "modelMat");
@@ -168,4 +208,3 @@ namespace Graphics {
     }
 
 }
-

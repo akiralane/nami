@@ -102,7 +102,7 @@ namespace glm
         }
         else
         {
-            // Graphics Gems III, page 96
+            // graphics Gems III, page 96
             T angle = acos(cosTheta);
             T phi = angle + k * glm::pi<T>();
             return (sin(angle - a * phi)* x + sin(a * phi) * z) / sin(angle);

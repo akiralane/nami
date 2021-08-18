@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -14,7 +15,7 @@
 #include <sstream>
 #include <fstream>
 
-namespace Graphics {
+namespace graphics {
 
     /**
      * Sets up GLFW and GLAD, creating a new window
