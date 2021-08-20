@@ -7,21 +7,43 @@
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
 const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 
+
 namespace graphics {
 
     namespace {
+
+        bool isWireframe = false;
+
         void error_callback(int error, const char *desc) {
             fprintf(stderr, "something's gone wrong! error %i: %s", error, desc);
         }
 
+        void toggle_wireframe() {
+            if (isWireframe) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            } else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            isWireframe = !isWireframe;
+        }
+
         void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            if (action == GLFW_PRESS) {
+                switch (key) {
+                    case GLFW_KEY_ESCAPE:
+                        glfwSetWindowShouldClose(window, GLFW_TRUE);
+                        break;
+                    case GLFW_KEY_E:
+                        toggle_wireframe();
+                        break;
+                    default:
+                        break;
+
+                }
             }
         }
 
         void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-            // when the window is resized, update the viewport size
             glViewport(0, 0, width, height);
         }
 
@@ -59,7 +81,7 @@ namespace graphics {
         }
 
         void generate_texture(unsigned int &texture) {
-            
+
             // texture parameters for this texture
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -83,46 +105,13 @@ namespace graphics {
 
         void generate_model(unsigned int &vao, unsigned int &texture) {
 
-//            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
             // the element buffer object stores indices that OpenGL uses to decide which vertices to draw
             // see "indexed drawing" below
             unsigned int vbo, ebo;
 
-//            float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 3];
-//            std::vector<float> vecStream = wave::get_vector_stream();
-//
-//            // inserting 0, 1 at the end of each row
-//            int offset = 0;
-//            for (int i = 0; i < wave::GRID_SIZE; i++) {
-//                vecStream.insert(vecStream.begin()+i+3+offset, 0.0f);
-//                vecStream.insert(vecStream.begin()+i+4+offset, 1.0f);
-//                offset += 4;
-//            }
-//
-//            std::copy(vecStream.begin(), vecStream.end(), waveData);
-
-            float waveData[] = {
-                    0,   0,   0.4, 0, 1,
-                    0,   0.5, 0.2, 0, 1,
-                    0,   1,   0.3, 0, 1,
-                    0,   1.5, 0.1, 0, 1,
-
-                    0.5, 0,   0.3, 0, 1,
-                    0.5, 0.5, 0.5, 0, 1,
-                    0.5, 1,   0.8, 0, 1,
-                    0.5, 1.5, 0.2, 0, 1,
-
-                    1.0, 0,   0.7, 0, 1,
-                    1.0, 0.5, 1.0, 0, 1,
-                    1.0, 1,   1.0, 0, 1,
-                    1.0, 1.5, 0.6, 0, 1,
-
-                    1.5, 0,   0.4, 0, 1,
-                    1.5, 0.5, 0.6, 0, 1,
-                    1.5, 1,   0.8, 0, 1,
-                    1.5, 1.5, 0.3, 0, 1,
-            };
+            float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
+            std::vector<float> vecStream = wave::get_vector_stream();
+            std::copy(vecStream.begin(), vecStream.end(), waveData); // seems expensive - is there a better way?
 
             // indexed drawing - the rectangle's triangles have some overlapping vertices,
             // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
@@ -193,14 +182,13 @@ namespace graphics {
         // initially, the camera is at the world space origin
         // the view matrix transforms this to wherever you need it to be
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -4.0f));
-
+        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -5.0f));
 
         // the projection matrix determines the perspective of the view
         // FOV, ortho vs perspective, etc.
         glm::mat4 projectionMat;
         projectionMat = glm::perspective(
-                glm::radians(45.0f), (float)(DEFAULT_WINDOW_WIDTH / DEFAULT_WINDOW_HEIGHT),
+                glm::radians(45.0f), float(DEFAULT_WINDOW_WIDTH) / float(DEFAULT_WINDOW_HEIGHT),
                 0.1f, 100.f
         );
 
@@ -228,7 +216,7 @@ namespace graphics {
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
 
             // draw the rectangle (glDrawElements because we're using an EBO)
-            // TODO: CHANGE THIS NUMBER DEPENDING ON HOW MANY TRIANGLES THERE ARE
+            // TODO: CHANGE THIS NUMBER DEPENDING ON HOW MANY INDICES THERE ARE
             glDrawElements(GL_TRIANGLE_STRIP, 26, GL_UNSIGNED_INT, nullptr);
 
             glfwSwapBuffers(window);

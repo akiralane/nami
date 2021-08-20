@@ -15,12 +15,11 @@
 
 namespace wave {
 
-    const float SPACING = 0.5f; // distance between each vertex in a row
+    const float SPACING = 1.0; // distance between each vertex in a row
     static const int GRID_SIZE = 4; // number of rows and columns
 
-
-    const float X_OFFSET = 0.0f;
-    const float Y_OFFSET = 0.0f;
+    const float X_OFFSET = -0.8f;
+    const float Y_OFFSET = -0.8f;
 
     extern float heights[GRID_SIZE*GRID_SIZE];
     extern int indices[];
