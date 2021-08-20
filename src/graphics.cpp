@@ -1,14 +1,11 @@
 #include "nami/graphics.h"
+#include "nami/wave.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
 
-
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
 const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
-
-//const unsigned int DEFAULT_WINDOW_WIDTH = 800;
-//const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 
 namespace graphics {
 
@@ -62,7 +59,7 @@ namespace graphics {
         }
 
         void generate_texture(unsigned int &texture) {
-
+            
             // texture parameters for this texture
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -86,37 +83,72 @@ namespace graphics {
 
         void generate_model(unsigned int &vao, unsigned int &texture) {
 
+//            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
             // the element buffer object stores indices that OpenGL uses to decide which vertices to draw
             // see "indexed drawing" below
             unsigned int vbo, ebo;
 
-            float vertices[] = {
-                    // vertex positions     // texture coords
-                     0.5f,  0.5f,  0.0f,    1.0f, 1.0f,  // top right
-                     0.5f, -0.5f,  0.0f,    1.0f, 0.0f,  // bottom right
-                    -0.5f, -0.5f,  0.0f,    0.0f, 0.0f,  // bottom left
-                    -0.5f,  0.5f,  0.0f,    0.0f, 1.0f   // top left
+//            float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 3];
+//            std::vector<float> vecStream = wave::get_vector_stream();
+//
+//            // inserting 0, 1 at the end of each row
+//            int offset = 0;
+//            for (int i = 0; i < wave::GRID_SIZE; i++) {
+//                vecStream.insert(vecStream.begin()+i+3+offset, 0.0f);
+//                vecStream.insert(vecStream.begin()+i+4+offset, 1.0f);
+//                offset += 4;
+//            }
+//
+//            std::copy(vecStream.begin(), vecStream.end(), waveData);
+
+            float waveData[] = {
+                    0,   0,   0.4, 0, 1,
+                    0,   0.5, 0.2, 0, 1,
+                    0,   1,   0.3, 0, 1,
+                    0,   1.5, 0.1, 0, 1,
+
+                    0.5, 0,   0.3, 0, 1,
+                    0.5, 0.5, 0.5, 0, 1,
+                    0.5, 1,   0.8, 0, 1,
+                    0.5, 1.5, 0.2, 0, 1,
+
+                    1.0, 0,   0.7, 0, 1,
+                    1.0, 0.5, 1.0, 0, 1,
+                    1.0, 1,   1.0, 0, 1,
+                    1.0, 1.5, 0.6, 0, 1,
+
+                    1.5, 0,   0.4, 0, 1,
+                    1.5, 0.5, 0.6, 0, 1,
+                    1.5, 1,   0.8, 0, 1,
+                    1.5, 1.5, 0.3, 0, 1,
             };
 
             // indexed drawing - the rectangle's triangles have some overlapping vertices,
             // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
             // this is significantly more important when models become more complicated than two triangles
-            unsigned int indices[] = {
-                    0, 1, 3,  // first triangle
-                    1, 2, 3   // second triangle
+            // also, it seems like a pain to generate programmatically
+            int indices[] = {
+                    0, 4,  1, 5,  2,  6,  3,  7,     /* RESTART */ 16,
+                    4, 8,  5, 9,  6,  10, 7,  11,    /* RESTART */ 16,
+                    8, 12, 9, 13, 10, 14, 11, 15     /* NO RESTART */
             };
 
             glGenVertexArrays(1, &vao);
+
             glGenBuffers(1, &vbo);
             glGenBuffers(1, &ebo);
 
             glBindVertexArray(vao);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(waveData), waveData, GL_DYNAMIC_DRAW);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+            glEnable(GL_PRIMITIVE_RESTART);
+            glPrimitiveRestartIndex(16);
 
             generate_texture(texture);
 
@@ -161,7 +193,8 @@ namespace graphics {
         // initially, the camera is at the world space origin
         // the view matrix transforms this to wherever you need it to be
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -3.0f));
+        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -4.0f));
+
 
         // the projection matrix determines the perspective of the view
         // FOV, ortho vs perspective, etc.
@@ -194,8 +227,9 @@ namespace graphics {
             unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projectionMat");
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
 
-            // draw the rectangle
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            // draw the rectangle (glDrawElements because we're using an EBO)
+            // TODO: CHANGE THIS NUMBER DEPENDING ON HOW MANY TRIANGLES THERE ARE
+            glDrawElements(GL_TRIANGLE_STRIP, 26, GL_UNSIGNED_INT, nullptr);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
