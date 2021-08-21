@@ -9,6 +9,10 @@ namespace wave {
             0.4f, 0.6f, 0.8f, 0.3f
     };
 
+    // (num of strips) * (points per strip) + (number of primitive-return indices)
+    int INDEX_COUNT =
+            (GRID_SIZE-1) * (GRID_SIZE*2) + (GRID_SIZE-2);
+
     std::vector<float> get_vector_stream() {
 
         std::vector<float> vectorStream;
@@ -21,7 +25,7 @@ namespace wave {
             std::vector<float> point = {
                     (float(row)     * SPACING) + X_OFFSET, // x
                     (float(column)  * SPACING) + Y_OFFSET, // y
-                    heights[i],                            // z (which has become height somehow)
+                    static_cast <float> (rand()) / static_cast <float> (RAND_MAX),                            // z (which has become height somehow) NOLINT(cert-msc50-cpp)
                     0, 1                                   // texture
             };
 
@@ -31,6 +35,33 @@ namespace wave {
 
         return vectorStream;
         
+    }
+
+    void generate_indices(int indices[]) {
+
+        int previous = GRID_SIZE - 1;
+        bool isEven = true; // modulo is unreliable because of the restart index
+
+        int stripPosition = 0;
+        for (int i = 0; i < INDEX_COUNT; i++) {
+
+            if (stripPosition == GRID_SIZE * 2) {
+                indices[i] = PRIMITIVE_RESTART_INDEX;
+                stripPosition = 0;
+            } else if (isEven) {
+                indices[i] = previous - (GRID_SIZE - 1);
+                previous = indices[i];
+                isEven = !isEven;
+                stripPosition++;
+            } else {
+                indices[i] = previous + GRID_SIZE;
+                previous = indices[i];
+                isEven = !isEven;
+                stripPosition++;
+            }
+
+        }
+
     }
 
 

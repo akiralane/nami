@@ -117,11 +117,13 @@ namespace graphics {
             // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
             // this is significantly more important when models become more complicated than two triangles
             // also, it seems like a pain to generate programmatically
-            int indices[] = {
-                    0, 4,  1, 5,  2,  6,  3,  7,     /* RESTART */ 16,
-                    4, 8,  5, 9,  6,  10, 7,  11,    /* RESTART */ 16,
-                    8, 12, 9, 13, 10, 14, 11, 15     /* NO RESTART */
-            };
+            int indices[wave::INDEX_COUNT];
+            wave::generate_indices(indices);
+            //            int indices[] = {
+//                    0, 4,  1, 5,  2,  6,  3,  7,     /* RESTART */ 16,
+//                    4, 8,  5, 9,  6,  10, 7,  11,    /* RESTART */ 16,
+//                    8, 12, 9, 13, 10, 14, 11, 15     /* NO RESTART */
+//            };
 
             glGenVertexArrays(1, &vao);
 
@@ -137,7 +139,7 @@ namespace graphics {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
             glEnable(GL_PRIMITIVE_RESTART);
-            glPrimitiveRestartIndex(16);
+            glPrimitiveRestartIndex(wave::PRIMITIVE_RESTART_INDEX);
 
             generate_texture(texture);
 
@@ -198,6 +200,8 @@ namespace graphics {
         unsigned int vao, texture;
         generate_model(vao, texture);
 
+
+
         while (!glfwWindowShouldClose(window)) {
 
             glClearColor(0.2, 0.3, 0.3, 1.0);
@@ -216,8 +220,8 @@ namespace graphics {
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
 
             // draw the rectangle (glDrawElements because we're using an EBO)
-            // TODO: CHANGE THIS NUMBER DEPENDING ON HOW MANY INDICES THERE ARE
-            glDrawElements(GL_TRIANGLE_STRIP, 26, GL_UNSIGNED_INT, nullptr);
+            // TODO: hopefully indexCount works??
+            glDrawElements(GL_TRIANGLE_STRIP, wave::INDEX_COUNT, GL_UNSIGNED_INT, nullptr);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
