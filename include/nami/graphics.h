@@ -30,4 +30,4 @@ namespace graphics {
 
 }
 
-#endif
+#endif // NAMI_GRAPHICS_H

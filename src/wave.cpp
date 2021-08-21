@@ -2,13 +2,7 @@
 
 namespace wave {
 
-    float heights[GRID_SIZE * GRID_SIZE] = {
-            0.4f, 0.2f, 0.3f, 0.1f,
-            0.3f, 0.5f, 0.8f, 0.2f,
-            0.7f, 1.0f, 1.0f, 0.6f,
-            0.4f, 0.6f, 0.8f, 0.3f
-    };
-
+    // the number of indices we want to define is given by
     // (num of strips) * (points per strip) + (number of primitive-return indices)
     int INDEX_COUNT =
             (GRID_SIZE-1) * (GRID_SIZE*2) + (GRID_SIZE-2);
@@ -23,10 +17,10 @@ namespace wave {
             int row = (i-column)/GRID_SIZE;
 
             std::vector<float> point = {
-                    (float(row)     * SPACING) + X_OFFSET, // x
-                    (float(column)  * SPACING) + Y_OFFSET, // y
-                    static_cast <float> (rand()) / static_cast <float> (RAND_MAX),                            // z (which has become height somehow) NOLINT(cert-msc50-cpp)
-                    0, 1                                   // texture
+                    (float(row)     * SPACING) + X_OFFSET,                         // x
+                    (float(column)  * SPACING) + Y_OFFSET,                         // y
+                    static_cast<float>(rand()) / static_cast<float>(RAND_MAX),     // z (which has become height somehow)
+                    0, 1                                                           // texture
             };
 
             vectorStream.insert(end(vectorStream), begin(point), end(point));
@@ -38,6 +32,20 @@ namespace wave {
     }
 
     void generate_indices(int indices[]) {
+
+        /**
+         * the sequence alternates -(gridsize-1), +gridsize applied to the previous value
+         * if our position in the strip:
+         *      is twice the grid size:
+         *          we have hit the end of the strip
+         *          write the restart index and reset our position
+         *      is even:
+         *          we are on the top row
+         *          write previous - (gridsize-1)
+         *      is odd:
+         *          we are on the bottom row
+         *          write previous + gridsize
+         */
 
         int previous = GRID_SIZE - 1;
         bool isEven = true; // modulo is unreliable because of the restart index
@@ -61,7 +69,6 @@ namespace wave {
             }
 
         }
-
     }
 
 

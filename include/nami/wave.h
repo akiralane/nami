@@ -6,19 +6,19 @@
 
 namespace wave {
 
-    // settings
+    // ==== settings ====
 
     const float SPACING = 1.0; // distance between each vertex in a row
     static const int GRID_SIZE = 20; // number of rows and columns
 
     extern int INDEX_COUNT;
 
-    const float X_OFFSET = -0.8f;
-    const float Y_OFFSET = -0.8f;
+    const float X_OFFSET = -5;
+    const float Y_OFFSET = -5;
 
     const int PRIMITIVE_RESTART_INDEX = 99;
 
-    extern float heights[GRID_SIZE*GRID_SIZE];
+    // ==== functions ====
 
     /**
      * Generates a series of floats which represent the vertices of the wave mesh, as
@@ -30,7 +30,7 @@ namespace wave {
 
     /**
      * Generates the order in which indexed drawing should take place
-     * @param indices the array which will be populated
+     * @param indices the array which will be populated with the indices
      */
     void generate_indices(int indices[]);
 
