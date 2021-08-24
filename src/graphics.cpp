@@ -50,7 +50,7 @@ namespace graphics {
             std::stringstream content;
             std::ifstream source (path);
 
-            if (!source.is_open()) { fprintf(stderr, "couldn't read file at %s", path.c_str()); }
+            if (!source.is_open()) { fprintf(stderr, "couldn't read shader file at %s", path.c_str()); }
 
             content << source.rdbuf();
             source.close();
@@ -108,6 +108,8 @@ namespace graphics {
             // see "indexed drawing" below
             unsigned int vbo, ebo;
 
+            wave::generate_heights(0);
+
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
             std::vector<float> vecStream = wave::get_vector_stream();
             std::copy(vecStream.begin(), vecStream.end(), waveData); // seems expensive - is there a better way?
@@ -163,6 +165,12 @@ namespace graphics {
 
         glfwMakeContextCurrent(window);
 
+        // load and set window icon
+        GLFWimage icon[1];
+        icon[0].pixels = stbi_load("..\\assets\\water.bmp", &icon[0].width, &icon[0].height, nullptr, 4);
+        glfwSetWindowIcon(window, 1, icon);
+        stbi_image_free(icon[0].pixels);
+
         gladLoadGL();
 
     }
@@ -170,7 +178,6 @@ namespace graphics {
     void start_render_loop(GLFWwindow* window) {
 
         // a model matrix transforms the object's vertices into the world space
-        // TODO: this is an example rotation!! you'll need something different probably
         glm::mat4 modelMat = glm::mat4(1.0f);
         modelMat = glm::rotate(modelMat, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
