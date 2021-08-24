@@ -1,8 +1,5 @@
 #include "nami/wave.h"
 
-// TODO: REMOVE
-#include <iostream>
-
 namespace wave {
 
     // the number of indices we want to define is given by
@@ -12,16 +9,15 @@ namespace wave {
 
     std::array<std::array<float, GRID_SIZE>, GRID_SIZE> heights = {0};
 
-    // TODO: get rid of the std::round() -- it's just for debug purposes
-    void generate_heights(float offset) {
+    void update_heights(float offset) {
 
         float waveA[GRID_SIZE];
         float waveB[GRID_SIZE];
 
-        // populate the input signals
+        // populate the input signal arrays
         for (int i = 0; i < GRID_SIZE; ++i) {
-            waveA[i] = std::round( sin(i * (M_PI/2) + offset) * 10000.0f) / 10000.0f;
-            waveB[i] = std::round( sin(i * (M_PI/2) + offset) * 10000.0f) / 10000.0f;
+            waveA[i] = float( sin(i * (M_PI/2) + offset) );
+            waveB[i] = float( sin(i * (M_PI/2) + offset) );
         }
 
         // fill the heights grid with the combined waves
@@ -31,27 +27,6 @@ namespace wave {
             }
         }
 
-        // print em out
-        for (int i = 0; i < wave::GRID_SIZE; ++i) {
-            for (int j = 0; j < wave::GRID_SIZE; ++j) {
-                std::cout << wave::heights[i][j] << ", ";
-            }
-            std::cout << std::endl;
-        }
-    }
-
-    void propagate_heights() {
-        for (int j = GRID_SIZE-1; j >= 0; --j) {
-            for (int i = GRID_SIZE-1; i >= 0; --i) {
-                if (i == 0) {
-                    heights[i][j] = std::round( sin(j * (M_PI/2)) * 1000.0f) / 1000.0f;
-                } else if (j == 0) {
-                    heights[i][j] = std::round( sin(i * (M_PI/2)+M_PI) * 1000.0f) / 1000.0f;
-                } else {
-                    heights[i][j] = heights[i-1][j] + heights[i][j-1];
-                }
-            }
-        }
     }
 
     std::vector<float> get_vector_stream() {
@@ -64,10 +39,10 @@ namespace wave {
             int row = (i-column)/GRID_SIZE;
 
             std::vector<float> point = {
-                    (float(row)     * SPACING) + X_OFFSET,                         // x
-                    (float(column)  * SPACING) + Y_OFFSET,                         // y
-                    static_cast<float>(rand()) / static_cast<float>(RAND_MAX),     // z (which has become height somehow)
-                    0, 1                                                           // texture
+                    (float(row)     * SPACING) + X_OFFSET, // x
+                    (float(column)  * SPACING) + Y_OFFSET, // y
+                    heights[row][column],                  // z, which has become height somehow
+                    0, 1                                   // texture mapping
             };
 
             vectorStream.insert(end(vectorStream), begin(point), end(point));
@@ -116,6 +91,7 @@ namespace wave {
             }
 
         }
+
     }
 
 

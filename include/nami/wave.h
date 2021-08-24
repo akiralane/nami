@@ -13,23 +13,28 @@ namespace wave {
     const float SPACING = 1.0; // distance between each vertex in a row
     static const int GRID_SIZE = 14; // number of rows and columns
 
-    extern int INDEX_COUNT;
     extern std::array<std::array<float, GRID_SIZE>, GRID_SIZE> heights;
 
+    // these offsets translate the grid's vertices in world space
+    // should probably delete these and translate the camera instead TODO
     const float X_OFFSET = -5;
     const float Y_OFFSET = -5;
 
-    const int PRIMITIVE_RESTART_INDEX = 99;
+    extern int INDEX_COUNT; // the number of indices with which the grid is drawn -  a function of the GRID_SIZE
+    const int PRIMITIVE_RESTART_INDEX = 99; // the index which will cause OGL to begin drawing a new primitive
 
     // ==== functions ====
 
-    void generate_heights(float offset);
-
-    void propagate_heights();
+    /**
+     * Updates the heights float 'matrix' with data according to the trig offset given.
+     * If offset is increasing in small enough increments, the waves appear to move.
+     * @param offset The value to offset Theta by, shifting sin's values
+     */
+    void update_heights(float offset);
 
     /**
      * Generates a series of floats which represent the vertices of the wave mesh, as
-     * described by the constants in the namespace.
+     * described by the settings constants in this namespace.
      * Each vertex is of the form (x,y,z)(t_0,t_1).
      * @return the 'vector stream' which the VBO wants
      */
@@ -43,4 +48,4 @@ namespace wave {
 
 }
 
-#endif
+#endif // NAMI_WAVE_H

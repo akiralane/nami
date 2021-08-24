@@ -7,7 +7,6 @@
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
 const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 
-
 namespace graphics {
 
     namespace {
@@ -102,13 +101,13 @@ namespace graphics {
 
         }
 
-        void generate_model(unsigned int &vao, unsigned int &texture) {
+        void generate_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
 
             // the element buffer object stores indices that OpenGL uses to decide which vertices to draw
             // see "indexed drawing" below
-            unsigned int vbo, ebo;
+            unsigned int ebo;
 
-            wave::generate_heights(0);
+            wave::update_heights(0);
 
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
             std::vector<float> vecStream = wave::get_vector_stream();
@@ -173,6 +172,8 @@ namespace graphics {
 
         gladLoadGL();
 
+        glEnable(GL_DEPTH_TEST);
+
     }
 
     void start_render_loop(GLFWwindow* window) {
@@ -197,25 +198,37 @@ namespace graphics {
         unsigned int shaderProgram;
         generate_shader_program(shaderProgram);
 
-        unsigned int vao, texture;
-        generate_model(vao, texture);
+        unsigned int vao, vbo, texture;
+        generate_model(vao, vbo, texture);
 
         while (!glfwWindowShouldClose(window)) {
 
             glClearColor(0.2, 0.3, 0.3, 1.0);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glUseProgram(shaderProgram);
-            glBindVertexArray(vao);
-            glBindTexture(GL_TEXTURE_2D, texture);
 
-            // send the matrices to the vertex shader
+            // ==== VIEW ====
             unsigned int modelLoc = glGetUniformLocation(shaderProgram, "modelMat");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
             unsigned int viewLoc = glGetUniformLocation(shaderProgram, "viewMat");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
             unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projectionMat");
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+            // ==== WAVES ====
+            wave::update_heights(float(glfwGetTime()));
+
+            float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
+            std::vector<float> vecStream = wave::get_vector_stream();
+            std::copy(vecStream.begin(), vecStream.end(), waveData); // there's definitely a better way TODO
+
+            glBindVertexArray(vao);
+            glBindTexture(GL_TEXTURE_2D, texture);
+
+            // update the vbo with the new heights
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(waveData), waveData);
 
             // draw the strips of triangle for the wave (glDrawElements because we're using an EBO)
             glDrawElements(GL_TRIANGLE_STRIP, wave::INDEX_COUNT, GL_UNSIGNED_INT, nullptr);

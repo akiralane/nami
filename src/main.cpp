@@ -1,7 +1,7 @@
 #include "nami/graphics.h"
 
 /**
- * TODO: - make the waves move
+ * TODO: - bifurcate graphics namespace into 'core' and 'generation'(?)
  *       - tinker with the perspective
  *       - add audio
  *       - add the house
