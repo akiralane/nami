@@ -107,15 +107,15 @@ namespace graphics {
             // see "indexed drawing" below
             unsigned int ebo;
 
+            // create the initial values for the heightmap
             wave::update_heights(0);
 
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
             std::vector<float> vecStream = wave::get_vector_stream();
             std::copy(vecStream.begin(), vecStream.end(), waveData); // seems expensive - is there a better way?
 
-            // indexed drawing - the rectangle's triangles have some overlapping vertices,
+            // indexed drawing - the triangles have some overlapping vertices,
             // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
-            // this is significantly more important when models become more complicated than two triangles
             int indices[wave::INDEX_COUNT];
             wave::generate_indices(indices);
 
@@ -185,7 +185,7 @@ namespace graphics {
         // initially, the camera is at the world space origin
         // the view matrix transforms this to wherever you need it to be
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -5.0f));
+        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -10.0f));
 
         // the projection matrix determines the perspective of the view
         // FOV, ortho vs perspective, etc.

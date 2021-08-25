@@ -6,6 +6,7 @@
  *       - add audio
  *       - add the house
  *       - add skybox (clouds etc)
+ *       - shift all dependencies into a deps folder??
  */
 
 int main() {

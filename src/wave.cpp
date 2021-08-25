@@ -9,6 +9,7 @@ namespace wave {
 
     std::array<std::array<float, GRID_SIZE>, GRID_SIZE> heights = {0};
 
+    // TODO: consider just having one wave input if they're both going to be identical
     void update_heights(float offset) {
 
         float waveA[GRID_SIZE];
@@ -16,8 +17,8 @@ namespace wave {
 
         // populate the input signal arrays
         for (int i = 0; i < GRID_SIZE; ++i) {
-            waveA[i] = float( sin(i * (M_PI/2) + offset) );
-            waveB[i] = float( sin(i * (M_PI/2) + offset) );
+            waveA[i] = float( sin(i * (M_PI/2) / 5 + offset) );
+            waveB[i] = float( sin(i * (M_PI/2) / 5 + offset) );
         }
 
         // fill the heights grid with the combined waves

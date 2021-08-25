@@ -11,7 +11,7 @@ namespace wave {
     // ==== settings ====
 
     const float SPACING = 1.0; // distance between each vertex in a row
-    static const int GRID_SIZE = 14; // number of rows and columns
+    static const int GRID_SIZE = 12; // number of rows and columns
 
     extern std::array<std::array<float, GRID_SIZE>, GRID_SIZE> heights;
 
@@ -21,7 +21,7 @@ namespace wave {
     const float Y_OFFSET = -5;
 
     extern int INDEX_COUNT; // the number of indices with which the grid is drawn -  a function of the GRID_SIZE
-    const int PRIMITIVE_RESTART_INDEX = 99; // the index which will cause OGL to begin drawing a new primitive
+    const int PRIMITIVE_RESTART_INDEX = -1; // the index which will cause OGL to begin drawing a new primitive
 
     // ==== functions ====
 
