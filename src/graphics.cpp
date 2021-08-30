@@ -13,10 +13,6 @@ namespace graphics {
 
         bool isWireframe = false;
 
-        void error_callback(int error, const char *desc) {
-            fprintf(stderr, "something's gone wrong! error %i: %s", error, desc);
-        }
-
         void toggle_wireframe() {
             if (isWireframe) {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -24,6 +20,10 @@ namespace graphics {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
             isWireframe = !isWireframe;
+        }
+
+        void error_callback(int error, const char *desc) {
+            fprintf(stderr, "something's gone wrong! error %i: %s", error, desc);
         }
 
         void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -147,7 +147,7 @@ namespace graphics {
             glEnableVertexAttribArray(1); // texture coordinates
 
         }
-    }
+    } // end anonymous namespace
 
     void init(GLFWwindow* &window) {
 
@@ -185,7 +185,7 @@ namespace graphics {
         // initially, the camera is at the world space origin
         // the view matrix transforms this to wherever you need it to be
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -10.0f));
+        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -5.0f));
 
         // the projection matrix determines the perspective of the view
         // FOV, ortho vs perspective, etc.

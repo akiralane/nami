@@ -4,27 +4,26 @@ namespace wave {
 
     // the number of indices we want to define is given by
     // (num of strips) * (points per strip) + (number of primitive-return indices)
-    int INDEX_COUNT =
+    const int INDEX_COUNT =
             (GRID_SIZE-1) * (GRID_SIZE*2) + (GRID_SIZE-2);
 
     std::array<std::array<float, GRID_SIZE>, GRID_SIZE> heights = {0};
 
-    // TODO: consider just having one wave input if they're both going to be identical
     void update_heights(float offset) {
 
-        float waveA[GRID_SIZE];
-        float waveB[GRID_SIZE];
+        float signal[GRID_SIZE];
 
-        // populate the input signal arrays
+        // generate the signal
         for (int i = 0; i < GRID_SIZE; ++i) {
-            waveA[i] = float( sin(i * (M_PI/2) / 5 + offset) );
-            waveB[i] = float( sin(i * (M_PI/2) / 5 + offset) );
+            signal[i] = float(
+                sin( (1/WAVELENGTH)*(i*M_PI/2) + (offset*SPEED) ) * AMPLITUDE
+            );
         }
 
         // fill the heights grid with the combined waves
         for (int i = 0; i < GRID_SIZE; ++i) {
             for (int j = 0; j < GRID_SIZE; ++j) {
-                heights[i][j] = waveA[i] + waveB[j];
+                heights[i][j] = signal[i] + signal[j];
             }
         }
 
@@ -40,10 +39,10 @@ namespace wave {
             int row = (i-column)/GRID_SIZE;
 
             std::vector<float> point = {
-                    (float(row)     * SPACING) + X_OFFSET, // x
-                    (float(column)  * SPACING) + Y_OFFSET, // y
-                    heights[row][column],                  // z, which has become height somehow
-                    0, 1                                   // texture mapping
+                    (float(row)     * SPACING), // x
+                    (float(column)  * SPACING), // y
+                    heights[row][column],       // z, which has become height somehow
+                    0, 1                        // texture mapping
             };
 
             vectorStream.insert(end(vectorStream), begin(point), end(point));
@@ -51,7 +50,6 @@ namespace wave {
         }
 
         return vectorStream;
-        
     }
 
     void generate_indices(int indices[]) {
