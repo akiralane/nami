@@ -14,7 +14,7 @@ namespace wave {
     static const int GRID_SIZE = 12; // number of rows and columns
 
     const float WAVELENGTH = 1.2;
-    const float AMPLITUDE = 0.3;
+    const float AMPLITUDE = 0.15;
     const float SPEED = 1.2;
 
     const int PRIMITIVE_RESTART_INDEX = -1; // the index which will cause OGL to begin drawing a new primitive

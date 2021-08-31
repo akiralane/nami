@@ -1,5 +1,7 @@
 #ifndef NAMI_GRAPHICS_H
-#define NAMI_GRAPHICS_H
+#define NAMI_CORE_H
+
+#include "nami/wave.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -16,17 +18,27 @@
 
 namespace graphics {
 
-    /**
-     * Sets up GLFW and GLAD, creating a new window
-     * @param window The pointer in which the window will be placed
-     */
-    void init(GLFWwindow* &window);
+    namespace generation {
+        void generate_shader_program(unsigned int &program);
+        void generate_texture(unsigned int &texture);
+        void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture);
+    }
 
-    /**
-     * Begins the main render loop
-     * @param window The window to render to
-     */
-    void start_render_loop(GLFWwindow* window);
+    namespace core {
+
+        /**
+         * Sets up GLFW and GLAD, creating a new window
+         * @param window The pointer in which the window will be placed
+         */
+        void init(GLFWwindow *&window);
+
+        /**
+         * Begins the main render loop
+         * @param window The window to render to
+         */
+        void start_render_loop(GLFWwindow *window);
+
+    }
 
 }
 

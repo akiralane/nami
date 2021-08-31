@@ -11,8 +11,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_executable(nami
         src/main.cpp
-        src/graphics.cpp
         src/wave.cpp
+        src/graphics/core.cpp
+        src/graphics/generation.cpp
         lib/glad/glad.c
 )
 
