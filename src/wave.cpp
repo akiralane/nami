@@ -39,10 +39,10 @@ namespace wave {
             int row = (i-column)/GRID_SIZE;
 
             std::vector<float> point = {
-                    (float(row)     * SPACING), // x
-                    (float(column)  * SPACING), // y
-                    heights[row][column],       // z, which has become height somehow
-                    0, 1                        // texture mapping
+                    (float(row)     * SPACING),                       // x
+                    heights[row][column],                             // y
+                    (float(column)  * SPACING),                       // z
+                    (float(row) * SPACING), (float(column) * SPACING) // texture mapping
             };
 
             vectorStream.insert(end(vectorStream), begin(point), end(point));

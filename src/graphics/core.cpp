@@ -81,8 +81,8 @@ namespace graphics::core {
         // initially, the camera is at the world space origin
         // the view matrix transforms this to wherever you need it to be
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -5.0f));
-        viewMat = glm::rotate(viewMat, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -20.0f));
+        viewMat = glm::rotate(viewMat, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, -5.0f));
 
         // the projection matrix determines the perspective of the view
         // FOV, ortho vs perspective, etc.
@@ -95,8 +95,18 @@ namespace graphics::core {
         unsigned int shaderProgram;
         generation::generate_shader_program(shaderProgram);
 
-        unsigned int vao, vbo, texture;
-        generation::generate_wave_model(vao, vbo, texture);
+        unsigned int vao;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        unsigned int waveVbo, waveTexture;
+        generation::generate_wave_model(vao, waveVbo, waveTexture);
+
+        // ==== specify attributes ====
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
+        glEnableVertexAttribArray(0); // vertex positions
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1); // texture coordinates
 
         while (!glfwWindowShouldClose(window)) {
 
@@ -121,10 +131,10 @@ namespace graphics::core {
             std::copy(vecStream.begin(), vecStream.end(), waveData); // there's definitely a better way TODO
 
             glBindVertexArray(vao);
-            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindTexture(GL_TEXTURE_2D, waveTexture);
 
-            // update the vbo with the new heights
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            // update the waveVbo with the new heights
+            glBindBuffer(GL_ARRAY_BUFFER, waveVbo);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(waveData), waveData);
 
             // draw the strips of triangle for the wave (glDrawElements because we're using an EBO)

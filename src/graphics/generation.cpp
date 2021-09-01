@@ -38,18 +38,17 @@ namespace graphics::generation {
         glDeleteShader(fragmentShader);
     }
 
-    void generate_texture(unsigned int &texture) {
+    void generate_texture(unsigned int &texture, const char* location) {
 
-        // texture parameters for this texture
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         int width, height, nrChannels;
-        unsigned char *data = stbi_load("..\\assets\\water.bmp", &width, &height, &nrChannels, 0);
+        unsigned char *data = stbi_load(location, &width, &height, &nrChannels, 0);
 
-        if (!data) { fprintf(stderr, "couldn't load texture!"); }
+        if (!data) { fprintf(stderr, "!! couldn't load texture at %s", location); }
 
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -58,7 +57,6 @@ namespace graphics::generation {
         glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(data);
-
     }
 
     void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
@@ -72,14 +70,12 @@ namespace graphics::generation {
 
         float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
         std::vector<float> vecStream = wave::get_vector_stream();
-        std::copy(vecStream.begin(), vecStream.end(), waveData); // seems expensive - is there a better way?
+        std::copy(vecStream.begin(), vecStream.end(), waveData); // seems expensive
 
         // indexed drawing - the triangles have some overlapping vertices,
         // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
         int indices[wave::INDEX_COUNT];
         wave::generate_indices(indices);
-
-        glGenVertexArrays(1, &vao);
 
         glGenBuffers(1, &vbo);
         glGenBuffers(1, &ebo);
@@ -95,17 +91,35 @@ namespace graphics::generation {
         glEnable(GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(wave::PRIMITIVE_RESTART_INDEX);
 
-        generate_texture(texture);
+        generate_texture(texture, "..\\assets\\water.bmp");
+    }
 
-        // remember that the attribute stride has to be 5*sizeof(float) because we added the texture coordinates
-        // (so that's the 3 from the 3d vertex positions plus the 2 from the 2d texture coords)
-        // it's easier to see if you just look at the vertices array
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
-        glEnableVertexAttribArray(0); // vertex positions
+    // https://stackoverflow.com/questions/25252512/how-can-i-pass-multiple-textures-to-a-single-shader
+    // https://stackoverflow.com/questions/55800355/how-can-i-add-multiple-textures-to-my-opengl-program !! BETTER ONE !!
+    void generate_skybox(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
 
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
-        glEnableVertexAttribArray(1); // texture coordinates
+        unsigned int ebo;
 
+        float data[] = {
+                /* TODO fill with data */
+        };
+
+        int indices[] = {
+                /* TODO also fill with data */
+        };
+
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ebo);
+
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        generate_texture(texture, "..\\assets\\cat.bmp");
     }
 
 }
