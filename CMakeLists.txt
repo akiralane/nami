@@ -8,13 +8,14 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/deps)
 
 add_executable(nami
         src/main.cpp
         src/wave.cpp
         src/graphics/core.cpp
         src/graphics/generation.cpp
-        lib/glad/glad.c
+        deps/glad/glad.c
 )
 
 find_package(glfw3 REQUIRED)

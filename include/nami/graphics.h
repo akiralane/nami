@@ -1,5 +1,5 @@
 #ifndef NAMI_GRAPHICS_H
-#define NAMI_CORE_H
+#define NAMI_GRAPHICS_H
 
 #include "nami/wave.h"
 
