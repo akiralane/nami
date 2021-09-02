@@ -22,7 +22,7 @@ namespace graphics {
         void generate_shader_program(unsigned int &program);
         void generate_texture(unsigned int &texture, const char* location);
         void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture);
-        void generate_skybox(unsigned int &vao, unsigned int &vbo, unsigned int &texture);
+        void generate_skybox_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture);
     }
 
     namespace core {

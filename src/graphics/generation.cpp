@@ -9,7 +9,7 @@ namespace graphics::generation {
         std::stringstream content;
         std::ifstream source (path);
 
-        if (!source.is_open()) { fprintf(stderr, "couldn't read shader file at %s", path.c_str()); }
+        if (!source.is_open()) { fprintf(stderr, "couldn't read shader file at %s\n", path.c_str()); }
 
         content << source.rdbuf();
         source.close();
@@ -48,7 +48,7 @@ namespace graphics::generation {
         int width, height, nrChannels;
         unsigned char *data = stbi_load(location, &width, &height, &nrChannels, 0);
 
-        if (!data) { fprintf(stderr, "!! couldn't load texture at %s", location); }
+        if (!data) { fprintf(stderr, "!! couldn't load texture at %s\n", location); }
 
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -96,16 +96,28 @@ namespace graphics::generation {
 
     // https://stackoverflow.com/questions/25252512/how-can-i-pass-multiple-textures-to-a-single-shader
     // https://stackoverflow.com/questions/55800355/how-can-i-add-multiple-textures-to-my-opengl-program !! BETTER ONE !!
-    void generate_skybox(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
+    void generate_skybox_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
 
         unsigned int ebo;
 
         float data[] = {
-                /* TODO fill with data */
+                0, 1, 0,    0,1,
+                0, 1, 1,    0,1,
+                1, 1, 1,    0,1,
+                1, 1, 0,    0,1,
+                0, 0, 0,    0,1,
+                0, 0, 1,    0,1,
+                1, 0, 1,    0,1,
+                1, 0, 1,    0,1
         };
 
-        int indices[] = {
-                /* TODO also fill with data */
+        int indices[] = { // each line describes a face - a pair of triangles
+                0, 1, 2,    2, 3, 0,
+                0, 3, 4,    4, 3, 7,
+                0, 1, 4,    4, 5, 1,
+                6, 2, 7,    7, 3, 2,
+                6, 7, 4,    4, 5, 6,
+                6, 2, 3,    3, 2, 1
         };
 
         glGenBuffers(1, &vbo);

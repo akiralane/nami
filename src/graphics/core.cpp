@@ -21,7 +21,7 @@ namespace graphics::core {
         }
 
         void error_callback(int error, const char *desc) {
-            fprintf(stderr, "something's gone wrong! error %i: %s", error, desc);
+            fprintf(stderr, "something's gone wrong! error %i: %s\n", error, desc);
         }
 
         void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -75,8 +75,8 @@ namespace graphics::core {
     void start_render_loop(GLFWwindow* window) {
 
         // a model matrix transforms the object's vertices into the world space
+        // currently unused...
         glm::mat4 modelMat = glm::mat4(1.0f);
-//        modelMat = glm::rotate(modelMat, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
         // initially, the camera is at the world space origin
         // the view matrix transforms this to wherever you need it to be
