@@ -77,15 +77,14 @@ namespace graphics::core {
         // a model matrix transforms the object's vertices into the world space
         // currently unused...
         glm::mat4 modelMat = glm::mat4(1.0f);
+//        modelMat = glm::scale(modelMat, glm::vec3(10, 10, 10));
 
-        // initially, the camera is at the world space origin
-        // the view matrix transforms this to wherever you need it to be
+        // the view matrix transforms the camera
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -20.0f));
+        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -18.0f));
         viewMat = glm::rotate(viewMat, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, -5.0f));
 
-        // the projection matrix determines the perspective of the view
-        // FOV, ortho vs perspective, etc.
+        // the projection matrix determines the perspective
         glm::mat4 projectionMat;
         projectionMat = glm::perspective(
                 glm::radians(45.0f), float(DEFAULT_WINDOW_WIDTH) / float(DEFAULT_WINDOW_HEIGHT),
@@ -95,18 +94,11 @@ namespace graphics::core {
         unsigned int shaderProgram;
         generation::generate_shader_program(shaderProgram);
 
-        unsigned int vao;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        unsigned int waveVao, waveVbo, waveIbo, waveTexture;
+        generation::generate_wave_model(waveVao, waveVbo, waveIbo, waveTexture);
 
-        unsigned int waveVbo, waveTexture;
-        generation::generate_wave_model(vao, waveVbo, waveTexture);
-
-        // ==== specify attributes ====
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
-        glEnableVertexAttribArray(0); // vertex positions
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1); // texture coordinates
+        unsigned int skyboxVao, skyboxVbo, skyboxIbo, skyboxTexture;
+        generation::generate_skybox_model(skyboxVao, skyboxVbo, skyboxIbo);
 
         while (!glfwWindowShouldClose(window)) {
 
@@ -128,9 +120,10 @@ namespace graphics::core {
 
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
             std::vector<float> vecStream = wave::get_vector_stream();
-            std::copy(vecStream.begin(), vecStream.end(), waveData); // there's definitely a better way TODO
+            std::copy(vecStream.begin(), vecStream.end(), waveData);
 
-            glBindVertexArray(vao);
+            glBindVertexArray(waveVao);
+
             glBindTexture(GL_TEXTURE_2D, waveTexture);
 
             // update the waveVbo with the new heights
@@ -138,7 +131,15 @@ namespace graphics::core {
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(waveData), waveData);
 
             // draw the strips of triangle for the wave (glDrawElements because we're using an EBO)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, waveIbo);
             glDrawElements(GL_TRIANGLE_STRIP, wave::INDEX_COUNT, GL_UNSIGNED_INT, nullptr);
+
+            // ==== SKYBOX ====
+//            glBindTexture(GL_TEXTURE_2D, skyboxTexture);
+            glBindVertexArray(skyboxVao);
+            glBindBuffer(GL_ARRAY_BUFFER, skyboxVbo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxIbo);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
 
             glfwSwapBuffers(window);
             glfwPollEvents();

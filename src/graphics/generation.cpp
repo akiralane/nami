@@ -59,11 +59,10 @@ namespace graphics::generation {
         stbi_image_free(data);
     }
 
-    void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
+    void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo, unsigned int &texture) {
 
-        // the element buffer object stores indices that OpenGL uses to decide which vertices to draw
+        // the index buffer object stores indices that OpenGL uses to decide which vertices to draw
         // see "indexed drawing" below
-        unsigned int ebo;
 
         // create the initial values for the heightmap
         wave::update_heights(0);
@@ -77,28 +76,33 @@ namespace graphics::generation {
         int indices[wave::INDEX_COUNT];
         wave::generate_indices(indices);
 
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ebo);
-
+        glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ibo);
+
+        // ==== buffer data ====
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(waveData), waveData, GL_DYNAMIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         glEnable(GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(wave::PRIMITIVE_RESTART_INDEX);
 
         generate_texture(texture, "..\\assets\\water.bmp");
+
+        // ==== specify attributes ====
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
+        glEnableVertexAttribArray(0); // vertex positions
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1); // texture coordinates
     }
 
-    // https://stackoverflow.com/questions/25252512/how-can-i-pass-multiple-textures-to-a-single-shader
     // https://stackoverflow.com/questions/55800355/how-can-i-add-multiple-textures-to-my-opengl-program !! BETTER ONE !!
-    void generate_skybox_model(unsigned int &vao, unsigned int &vbo, unsigned int &texture) {
-
-        unsigned int ebo;
+    void generate_skybox_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
 
         float data[] = {
                 0, 1, 0,    0,1,
@@ -108,7 +112,7 @@ namespace graphics::generation {
                 0, 0, 0,    0,1,
                 0, 0, 1,    0,1,
                 1, 0, 1,    0,1,
-                1, 0, 1,    0,1
+                1, 0, 0,    0,1
         };
 
         int indices[] = { // each line describes a face - a pair of triangles
@@ -117,21 +121,28 @@ namespace graphics::generation {
                 0, 1, 4,    4, 5, 1,
                 6, 2, 7,    7, 3, 2,
                 6, 7, 4,    4, 5, 6,
-                6, 2, 3,    3, 2, 1
+                6, 2, 5,    5, 2, 1
         };
 
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ebo);
-
+        glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
+
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ibo);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        generate_texture(texture, "..\\assets\\cat.bmp");
+        // ==== specify attributes ====
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
+        glEnableVertexAttribArray(0); // vertex positions
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1); // texture coordinates
+
+//        generate_texture(texture, "..\\assets\\cat.bmp");
     }
 
 }
