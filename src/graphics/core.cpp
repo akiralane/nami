@@ -7,7 +7,13 @@
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
 const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 
+Camera camera(glm::vec3(5, 1, 15), glm::vec3(0, 1, 0));
+
 namespace graphics::core {
+
+    bool initialClick = true;
+    double previousMouseX = DEFAULT_WINDOW_WIDTH / 2.0f;
+    double previousMouseY = DEFAULT_WINDOW_HEIGHT / 2.0f;
 
     namespace {
 
@@ -52,6 +58,22 @@ namespace graphics::core {
             if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { camera.move(Camera::Direction::DOWN); }
         }
 
+        void cursor_pos_callback(GLFWwindow *window, double x, double y) {
+
+            if (initialClick) {
+                previousMouseX = float(x);
+                previousMouseY = float(y);
+                initialClick = false;
+            }
+
+            auto xDifference = float(x - previousMouseX);
+            auto yDifference = float(previousMouseY - y);
+            previousMouseX = x;
+            previousMouseY = y;
+
+            camera.look(xDifference, yDifference);
+        }
+
         void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
             glViewport(0, 0, width, height);
         }
@@ -67,8 +89,11 @@ namespace graphics::core {
                 "波", nullptr, nullptr
         );
 
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
         glfwSetKeyCallback(window, key_callback); // receive input
         glfwSetErrorCallback(error_callback); // report errors
+        glfwSetCursorPosCallback(window, cursor_pos_callback);
         glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // resize viewport on window resize
 
         glfwMakeContextCurrent(window);
@@ -107,9 +132,6 @@ namespace graphics::core {
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
         generation::generate_texture(backgroundTexture, "..\\assets\\cat.bmp");
 
-        // ==== camera ====
-        Camera camera(glm::vec3(5, 1, 15), glm::vec3(0, 1, 0));
-
         // ==== MVP matrices ====
 
         // a model matrix transforms the object's vertices into the world space
@@ -117,9 +139,6 @@ namespace graphics::core {
 
         // the view matrix transforms the camera
         glm::mat4 viewMat = glm::mat4(1.0f);
-//        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -10.0f));
-//        viewMat = glm::rotate(viewMat, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, -5.0f));
-//        viewMat = glm::rotate(viewMat, glm::radians(45.0f), glm::vec3(0, 1, 0));
 
         // the projection matrix determines the perspective
         glm::mat4 projectionMat;
