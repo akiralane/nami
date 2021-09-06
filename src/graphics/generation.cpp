@@ -17,17 +17,31 @@ namespace graphics::generation {
         return strdup(content.str().c_str());
     }
 
-    void generate_shader_program(unsigned int &program) {
-        char* vertexShaderSource = read_shader_source("..\\shaders\\simple.vert");
-        char* fragmentShaderSource = read_shader_source("..\\shaders\\simple.frag");
+    void generate_shader_program(unsigned int &program, const char *vLocation, const char *fLocation) {
+        char* vertexShaderSource = read_shader_source(vLocation);
+        char* fragmentShaderSource = read_shader_source(fLocation);
 
+        GLint compileStatus = GL_FALSE;
+
+        // load and compile shader
         unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
         glCompileShader(vertexShader);
+        // check compile status
+        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
+        if (compileStatus != GL_TRUE) {
+            std::cerr << "VERTEX SHADER AT "<< vLocation << " FAILED TO COMPILE" << std::endl;
+        }
 
+        // load and compile shader
         unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
         glCompileShader(fragmentShader);
+        // check compile status
+        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileStatus);
+        if (compileStatus != GL_TRUE) {
+            std::cerr << "FRAGMENT SHADER AT "<< fLocation << " FAILED TO COMPILE" << std::endl;
+        }
 
         program = glCreateProgram();
         glAttachShader(program, vertexShader);
@@ -40,11 +54,6 @@ namespace graphics::generation {
 
     void generate_texture(unsigned int &texture, const char* location) {
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
         int width, height, nrChannels;
         unsigned char *data = stbi_load(location, &width, &height, &nrChannels, 0);
 
@@ -53,13 +62,18 @@ namespace graphics::generation {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(data);
     }
 
-    void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo, unsigned int &texture) {
+    void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
 
         // the index buffer object stores indices that OpenGL uses to decide which vertices to draw
         // see "indexed drawing" below
@@ -92,8 +106,6 @@ namespace graphics::generation {
         glEnable(GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(wave::PRIMITIVE_RESTART_INDEX);
 
-        generate_texture(texture, "..\\assets\\water.bmp");
-
         // ==== specify attributes ====
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
         glEnableVertexAttribArray(0); // vertex positions
@@ -101,27 +113,16 @@ namespace graphics::generation {
         glEnableVertexAttribArray(1); // texture coordinates
     }
 
-    // https://stackoverflow.com/questions/55800355/how-can-i-add-multiple-textures-to-my-opengl-program !! BETTER ONE !!
-    void generate_skybox_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
+    void generate_background_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
 
         float data[] = {
-                0, 1, 0,    0,1,
-                0, 1, 1,    0,1,
-                1, 1, 1,    0,1,
-                1, 1, 0,    0,1,
-                0, 0, 0,    0,1,
-                0, 0, 1,    0,1,
-                1, 0, 1,    0,1,
-                1, 0, 0,    0,1
-        };
+                -1, -1, 0,  0,0,
+                 1,  1, 0,  1,1,
+                -1,  1, 0,  0,1,
 
-        int indices[] = { // each line describes a face - a pair of triangles
-                0, 1, 2,    2, 3, 0,
-                0, 3, 4,    4, 3, 7,
-                0, 1, 4,    4, 5, 1,
-                6, 2, 7,    7, 3, 2,
-                6, 7, 4,    4, 5, 6,
-                6, 2, 5,    5, 2, 1
+                -1, -1, 0,  0,0,
+                 1, -1, 0,  1,0,
+                 1,  1, 0,  1,1,
         };
 
         glGenVertexArrays(1, &vao);
@@ -133,16 +134,12 @@ namespace graphics::generation {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
         // ==== specify attributes ====
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
         glEnableVertexAttribArray(0); // vertex positions
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1); // texture coordinates
 
-//        generate_texture(texture, "..\\assets\\cat.bmp");
     }
 
 }

@@ -19,10 +19,10 @@
 namespace graphics {
 
     namespace generation {
-        void generate_shader_program(unsigned int &program);
+        void generate_shader_program(unsigned int &program, const char *vLocation, const char *fLocation);
         void generate_texture(unsigned int &texture, const char* location);
-        void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo, unsigned int &texture);
-        void generate_skybox_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo);
+        void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo);
+        void generate_background_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo);
     }
 
     namespace core {

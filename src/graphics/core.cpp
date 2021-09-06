@@ -74,15 +74,36 @@ namespace graphics::core {
 
     void start_render_loop(GLFWwindow* window) {
 
+        // ==== SHADERS ====
+
+        unsigned int waveShader;
+        generation::generate_shader_program(
+                waveShader,
+                "..\\shaders\\simple.vert", "..\\shaders\\simple.frag");
+
+        unsigned int backgroundShader;
+        generation::generate_shader_program(
+                backgroundShader,
+                "..\\shaders\\background.vert", "..\\shaders\\simple.frag");
+
+        unsigned int waveVao, waveVbo, waveIbo, waveTexture;
+        generation::generate_wave_model(waveVao, waveVbo, waveIbo);
+        generation::generate_texture(waveTexture, "..\\assets\\water.bmp");
+
+        unsigned int backgroundVao, backgroundVbo, backgroundIbo, backgroundTexture;
+        generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
+        generation::generate_texture(backgroundTexture, "..\\assets\\cat.bmp");
+
+        // ==== MVP matrices ====
+
         // a model matrix transforms the object's vertices into the world space
-        // currently unused...
         glm::mat4 modelMat = glm::mat4(1.0f);
-//        modelMat = glm::scale(modelMat, glm::vec3(10, 10, 10));
 
         // the view matrix transforms the camera
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -18.0f));
+        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -10.0f));
         viewMat = glm::rotate(viewMat, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, -5.0f));
+        viewMat = glm::rotate(viewMat, glm::radians(45.0f), glm::vec3(0, 1, 0));
 
         // the projection matrix determines the perspective
         glm::mat4 projectionMat;
@@ -91,55 +112,64 @@ namespace graphics::core {
                 0.1f, 100.f
         );
 
-        unsigned int shaderProgram;
-        generation::generate_shader_program(shaderProgram);
-
-        unsigned int waveVao, waveVbo, waveIbo, waveTexture;
-        generation::generate_wave_model(waveVao, waveVbo, waveIbo, waveTexture);
-
-        unsigned int skyboxVao, skyboxVbo, skyboxIbo, skyboxTexture;
-        generation::generate_skybox_model(skyboxVao, skyboxVbo, skyboxIbo);
-
         while (!glfwWindowShouldClose(window)) {
 
             glClearColor(0.2, 0.3, 0.3, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glUseProgram(shaderProgram);
-
-            // ==== VIEW ====
-            unsigned int modelLoc = glGetUniformLocation(shaderProgram, "modelMat");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
-            unsigned int viewLoc = glGetUniformLocation(shaderProgram, "viewMat");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
-            unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projectionMat");
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
-
+            // -------------------------------------------------------
             // ==== WAVES ====
-            wave::update_heights(float(glfwGetTime()));
 
+            // generate and store the new sets of heights
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
+            wave::update_heights(float(glfwGetTime()));
             std::vector<float> vecStream = wave::get_vector_stream();
             std::copy(vecStream.begin(), vecStream.end(), waveData);
 
             glBindVertexArray(waveVao);
 
+            // uniforms
+            glUseProgram(waveShader);
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMat));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+            // texture
             glBindTexture(GL_TEXTURE_2D, waveTexture);
 
-            // update the waveVbo with the new heights
+            // drawing
             glBindBuffer(GL_ARRAY_BUFFER, waveVbo);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(waveData), waveData);
-
-            // draw the strips of triangle for the wave (glDrawElements because we're using an EBO)
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(waveData), waveData); // update values in buffer with new ones
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, waveIbo);
             glDrawElements(GL_TRIANGLE_STRIP, wave::INDEX_COUNT, GL_UNSIGNED_INT, nullptr);
 
-            // ==== SKYBOX ====
-//            glBindTexture(GL_TEXTURE_2D, skyboxTexture);
-            glBindVertexArray(skyboxVao);
-            glBindBuffer(GL_ARRAY_BUFFER, skyboxVbo);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxIbo);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+            // -------------------------------------------------------
+            // ==== BACKGROUND ====
+            // by rendering the background last, we reduce the number of fragments that the shader has to run on
+            // this does, however, mean we have to trick opengl into thinking the background is always at maximum depth
+            // this is done in the vertex shader, but in case anything is already at depth 1.0 we change the depth test condition here
+            glDepthFunc(GL_LEQUAL);
+
+            glBindVertexArray(backgroundVao);
+
+            // uniforms
+            glUseProgram(backgroundShader);
+            glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
+            glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
+            glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1)));
+
+            // texture
+            glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+
+            // drawing
+            glBindBuffer(GL_ARRAY_BUFFER, backgroundVbo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundIbo);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            glDepthFunc(GL_LESS); // reset to normal
+
+            int errorCode = glGetError();
+            if (errorCode != 0) { std::cerr << "GL ERROR " << errorCode << std::endl; }
 
             glfwSwapBuffers(window);
             glfwPollEvents();
