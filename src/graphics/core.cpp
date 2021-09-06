@@ -1,5 +1,7 @@
 #include "nami/graphics.h"
 
+#include "nami/camera.h"
+
 #include <stb_image/stb_image.h>
 
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
@@ -39,6 +41,17 @@ namespace graphics::core {
             }
         }
 
+        // this needs to exist because the key callback only fires once on keydown - you can't tell whether a key
+        // is being held or not. maybe move all key input handling into this function?
+        void handleInput(GLFWwindow *window, Camera &camera) {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { camera.move(Camera::Direction::FORWARDS); }
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { camera.move(Camera::Direction::LEFT); }
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { camera.move(Camera::Direction::BACKWARDS);}
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { camera.move(Camera::Direction::RIGHT); }
+            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) { camera.move(Camera::Direction::UP); }
+            if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { camera.move(Camera::Direction::DOWN); }
+        }
+
         void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
             glViewport(0, 0, width, height);
         }
@@ -74,7 +87,7 @@ namespace graphics::core {
 
     void start_render_loop(GLFWwindow* window) {
 
-        // ==== SHADERS ====
+        // ==== shaders, buffers etc. ====
 
         unsigned int waveShader;
         generation::generate_shader_program(
@@ -94,6 +107,9 @@ namespace graphics::core {
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
         generation::generate_texture(backgroundTexture, "..\\assets\\cat.bmp");
 
+        // ==== camera ====
+        Camera camera(glm::vec3(5, 1, 15), glm::vec3(0, 1, 0));
+
         // ==== MVP matrices ====
 
         // a model matrix transforms the object's vertices into the world space
@@ -101,9 +117,9 @@ namespace graphics::core {
 
         // the view matrix transforms the camera
         glm::mat4 viewMat = glm::mat4(1.0f);
-        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -10.0f));
-        viewMat = glm::rotate(viewMat, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, -5.0f));
-        viewMat = glm::rotate(viewMat, glm::radians(45.0f), glm::vec3(0, 1, 0));
+//        viewMat = glm::translate(viewMat, glm::vec3(-5.0f, -2.0f, -10.0f));
+//        viewMat = glm::rotate(viewMat, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, -5.0f));
+//        viewMat = glm::rotate(viewMat, glm::radians(45.0f), glm::vec3(0, 1, 0));
 
         // the projection matrix determines the perspective
         glm::mat4 projectionMat;
@@ -112,10 +128,13 @@ namespace graphics::core {
                 0.1f, 100.f
         );
 
+        // ==== MAIN RENDER LOOP ====
         while (!glfwWindowShouldClose(window)) {
 
             glClearColor(0.2, 0.3, 0.3, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            handleInput(window, camera);
 
             // -------------------------------------------------------
             // ==== WAVES ====
@@ -131,7 +150,7 @@ namespace graphics::core {
             // uniforms
             glUseProgram(waveShader);
             glUniformMatrix4fv(glGetUniformLocation(waveShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
-            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMat));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
             glUniformMatrix4fv(glGetUniformLocation(waveShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
             // texture

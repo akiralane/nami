@@ -15,8 +15,9 @@ add_executable(nami
         src/wave.cpp
         src/graphics/core.cpp
         src/graphics/generation.cpp
+        src/camera.cpp
         deps/glad/glad.c
-)
+        )
 
 find_package(glfw3 REQUIRED)
 
