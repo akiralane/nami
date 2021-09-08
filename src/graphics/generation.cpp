@@ -54,6 +54,8 @@ namespace graphics::generation {
 
     void generate_texture(unsigned int &texture, const char* location) {
 
+        stbi_set_flip_vertically_on_load(1);
+
         int width, height, nrChannels;
         unsigned char *data = stbi_load(location, &width, &height, &nrChannels, 0);
 

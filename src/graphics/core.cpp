@@ -18,6 +18,9 @@ namespace graphics::core {
     namespace {
 
         bool isWireframe = false;
+        bool windowHasFocus = true;
+
+        // ==== util functions ====
 
         void toggle_wireframe() {
             if (isWireframe) {
@@ -28,8 +31,37 @@ namespace graphics::core {
             isWireframe = !isWireframe;
         }
 
+        void print_camera_pos() {
+            glm::vec3 position = camera.getPosition();
+            glm::vec2 rotation = camera.getRotation();
+            std::cout << "Camera is at world position ("
+                      << position.x << ", " << position.y << ", " << position.z
+                      << "): pitch " << rotation.x << ", yaw " << rotation.y
+                      << std::endl;
+        }
+
+        // this needs to exist because the key callback only fires once on keydown
+        // you can't tell whether a key is being held or not
+        void handleInput(GLFWwindow *window, Camera &camera) {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { camera.move(Camera::Direction::FORWARDS); }
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { camera.move(Camera::Direction::LEFT); }
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { camera.move(Camera::Direction::BACKWARDS);}
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { camera.move(Camera::Direction::RIGHT); }
+            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) { camera.move(Camera::Direction::UP); }
+            if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { camera.move(Camera::Direction::DOWN); }
+        }
+
+        // ==== callbacks ====
+
         void error_callback(int error, const char *desc) {
             fprintf(stderr, "something's gone wrong! error %i: %s\n", error, desc);
+        }
+
+        void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                windowHasFocus = true;
+            }
         }
 
         void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -41,21 +73,17 @@ namespace graphics::core {
                     case GLFW_KEY_E:
                         toggle_wireframe();
                         break;
+                    case GLFW_KEY_TAB:
+                        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                        windowHasFocus = false;
+                        break;
+                    case GLFW_KEY_Q:
+                        print_camera_pos();
+                        break;
                     default:
                         break;
                 }
             }
-        }
-
-        // this needs to exist because the key callback only fires once on keydown - you can't tell whether a key
-        // is being held or not. maybe move all key input handling into this function?
-        void handleInput(GLFWwindow *window, Camera &camera) {
-            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { camera.move(Camera::Direction::FORWARDS); }
-            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { camera.move(Camera::Direction::LEFT); }
-            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { camera.move(Camera::Direction::BACKWARDS);}
-            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { camera.move(Camera::Direction::RIGHT); }
-            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) { camera.move(Camera::Direction::UP); }
-            if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { camera.move(Camera::Direction::DOWN); }
         }
 
         void cursor_pos_callback(GLFWwindow *window, double x, double y) {
@@ -71,7 +99,9 @@ namespace graphics::core {
             previousMouseX = x;
             previousMouseY = y;
 
-            camera.look(xDifference, yDifference);
+            if (windowHasFocus) {
+                camera.look(xDifference, yDifference);
+            }
         }
 
         void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -89,12 +119,13 @@ namespace graphics::core {
                 "波", nullptr, nullptr
         );
 
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
         glfwSetKeyCallback(window, key_callback); // receive input
         glfwSetErrorCallback(error_callback); // report errors
+        glfwSetMouseButtonCallback(window, mouse_button_callback);
         glfwSetCursorPosCallback(window, cursor_pos_callback);
         glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // resize viewport on window resize
+
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         glfwMakeContextCurrent(window);
 
@@ -130,7 +161,7 @@ namespace graphics::core {
 
         unsigned int backgroundVao, backgroundVbo, backgroundIbo, backgroundTexture;
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
-        generation::generate_texture(backgroundTexture, "..\\assets\\cat.bmp");
+        generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
         // ==== MVP matrices ====
 

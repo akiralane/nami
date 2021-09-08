@@ -35,11 +35,7 @@ public:
 
     glm::mat4 getViewMatrix();
     glm::vec3 getPosition();
-
-private:
-
-    void updateVectors();
-
+    glm::vec2 getRotation();
 
 };
 

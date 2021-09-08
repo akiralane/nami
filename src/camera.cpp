@@ -1,11 +1,10 @@
 #include "nami/camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 worldUp) : front(glm::vec3(0, 0, -1)) {
+Camera::Camera(glm::vec3 position, glm::vec3 worldUp) : front(glm::vec3(0, 0, -1)), yaw(-90), pitch(0) {
     this->position = position;
     this->worldUp = worldUp;
-    yaw = 0;
-    pitch = 0;
-    updateVectors();
+    right = glm::normalize(glm::cross(front, worldUp));
+    up = glm::normalize(glm::cross(right, front));
 }
 
 void Camera::move(Direction direction) {
@@ -48,13 +47,10 @@ void Camera::look(float deltaX, float deltaY) {
 }
 
 glm::mat4 Camera::getViewMatrix() {
-    // (position of camera, position of what we are looking at, camera up vector)
+    // args reminder: (position of camera, position of what we are looking at, camera up vector)
     return glm::lookAt(position, position + front, up);
 }
 
 glm::vec3 Camera::getPosition() { return position; }
 
-void Camera::updateVectors() {
-    right = glm::normalize(glm::cross(front, worldUp));
-    up = glm::normalize(glm::cross(right, front));
-}
+glm::vec2 Camera::getRotation() { return glm::vec2(pitch, yaw); }
