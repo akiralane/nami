@@ -21,7 +21,11 @@ namespace graphics {
     namespace generation {
         void generate_shader_program(unsigned int &program, const char *vLocation, const char *fLocation);
         void generate_texture(unsigned int &texture, const char* location);
+
+        void buffer_cuboid(std::vector<float> &buffer, glm::vec3 position, glm::vec3 scale);
+
         void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo);
+        void generate_house_model(unsigned int &vao, unsigned int &vbo);
         void generate_background_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo);
     }
 

@@ -42,7 +42,7 @@ namespace graphics::core {
 
         // this needs to exist because the key callback only fires once on keydown
         // you can't tell whether a key is being held or not
-        void handleInput(GLFWwindow *window, Camera &camera) {
+        void handleKeyInput(GLFWwindow *window, Camera &camera) {
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { camera.move(Camera::Direction::FORWARDS); }
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { camera.move(Camera::Direction::LEFT); }
             if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { camera.move(Camera::Direction::BACKWARDS);}
@@ -145,9 +145,9 @@ namespace graphics::core {
 
         // ==== shaders, buffers etc. ====
 
-        unsigned int waveShader;
+        unsigned int stdShader;
         generation::generate_shader_program(
-                waveShader,
+                stdShader,
                 "..\\shaders\\simple.vert", "..\\shaders\\simple.frag");
 
         unsigned int backgroundShader;
@@ -163,15 +163,19 @@ namespace graphics::core {
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
         generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
+        unsigned int houseVao, houseVbo;
+        generation::generate_house_model(houseVao, houseVbo);
+
         // ==== MVP matrices ====
 
         // a model matrix transforms the object's vertices into the world space
         glm::mat4 modelMat = glm::mat4(1.0f);
 
         // the view matrix transforms the camera
+        // (this is unused - the camera class generates the view matrix now)
         glm::mat4 viewMat = glm::mat4(1.0f);
 
-        // the projection matrix determines the perspective
+        // the projection matrix determines the perspective + fov
         glm::mat4 projectionMat;
         projectionMat = glm::perspective(
                 glm::radians(45.0f), float(DEFAULT_WINDOW_WIDTH) / float(DEFAULT_WINDOW_HEIGHT),
@@ -184,7 +188,7 @@ namespace graphics::core {
             glClearColor(0.2, 0.3, 0.3, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            handleInput(window, camera);
+            handleKeyInput(window, camera);
 
             // -------------------------------------------------------
             // ==== WAVES ====
@@ -198,10 +202,11 @@ namespace graphics::core {
             glBindVertexArray(waveVao);
 
             // uniforms
-            glUseProgram(waveShader);
-            glUniformMatrix4fv(glGetUniformLocation(waveShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
-            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
-            glUniformMatrix4fv(glGetUniformLocation(waveShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+            // TODO: move code (up) to somewhere more intuitive
+            glUseProgram(stdShader);
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
             // texture
             glBindTexture(GL_TEXTURE_2D, waveTexture);
@@ -209,8 +214,14 @@ namespace graphics::core {
             // drawing
             glBindBuffer(GL_ARRAY_BUFFER, waveVbo);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(waveData), waveData); // update values in buffer with new ones
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, waveIbo);
             glDrawElements(GL_TRIANGLE_STRIP, wave::INDEX_COUNT, GL_UNSIGNED_INT, nullptr);
+
+            // -------------------------------------------------------
+            // ==== HOUSE ====
+
+            glBindVertexArray(houseVao);
+            glBindBuffer(GL_ARRAY_BUFFER, houseVbo);
+            glDrawArrays(GL_TRIANGLES, 0, 72);
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====
@@ -232,7 +243,6 @@ namespace graphics::core {
 
             // drawing
             glBindBuffer(GL_ARRAY_BUFFER, backgroundVbo);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundIbo);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             glDepthFunc(GL_LESS); // reset to normal

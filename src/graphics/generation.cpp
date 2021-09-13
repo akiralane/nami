@@ -18,13 +18,12 @@ namespace graphics::generation {
     }
 
     void generate_shader_program(unsigned int &program, const char *vLocation, const char *fLocation) {
-        char* vertexShaderSource = read_shader_source(vLocation);
-        char* fragmentShaderSource = read_shader_source(fLocation);
 
         GLint compileStatus = GL_FALSE;
 
-        // load and compile shader
+        // load and compile vertex shader
         unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        char* vertexShaderSource = read_shader_source(vLocation);
         glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
         glCompileShader(vertexShader);
         // check compile status
@@ -33,8 +32,9 @@ namespace graphics::generation {
             std::cerr << "VERTEX SHADER AT "<< vLocation << " FAILED TO COMPILE" << std::endl;
         }
 
-        // load and compile shader
+        // load and compile fragment shader
         unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        char* fragmentShaderSource = read_shader_source(fLocation);
         glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
         glCompileShader(fragmentShader);
         // check compile status
@@ -75,12 +75,60 @@ namespace graphics::generation {
         stbi_image_free(data);
     }
 
+    void buffer_cuboid(std::vector<float> &buffer, glm::vec3 offset, glm::vec3 scale) {
+
+        // one 'group' per face
+        std::vector<float> data = {
+                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 0.0f,
+                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      1.0f, 0.0f,
+                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
+                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
+                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 0.0f,
+
+                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 1.0f,
+                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 1.0f,
+                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f, 1.0f,
+                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+
+                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
+                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+
+                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
+                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+
+                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
+                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+
+                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
+                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f
+        };
+
+        buffer.insert(buffer.end(), data.begin(), data.end());
+
+    }
+
     void generate_wave_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
 
-        // the index buffer object stores indices that OpenGL uses to decide which vertices to draw
-        // see "indexed drawing" below
-
-        // create the initial values for the heightmap
+        // populate heightmap with initial values
         wave::update_heights(0);
 
         float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
@@ -113,6 +161,29 @@ namespace graphics::generation {
         glEnableVertexAttribArray(0); // vertex positions
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1); // texture coordinates
+    }
+
+    void generate_house_model(unsigned int &vao, unsigned int &vbo) {
+
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        std::vector<float> buffer;
+        buffer_cuboid(buffer, glm::vec3(0, 0, 0), glm::vec3(3, 3, 3));
+        buffer_cuboid(buffer, glm::vec3(0, 0, 0), glm::vec3(1, 2, 6));
+
+        float data[buffer.size()];
+        std::copy(buffer.begin(), buffer.end(), data);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), nullptr);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+        glEnableVertexAttribArray(1);
     }
 
     void generate_background_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
