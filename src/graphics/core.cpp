@@ -163,8 +163,9 @@ namespace graphics::core {
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
         generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
-        unsigned int houseVao, houseVbo;
+        unsigned int houseVao, houseVbo, woodTexture;
         generation::generate_house_model(houseVao, houseVbo);
+        generation::generate_texture(woodTexture, "..\\assets\\wood.bmp");
 
         // ==== MVP matrices ====
 
@@ -220,8 +221,14 @@ namespace graphics::core {
             // ==== HOUSE ====
 
             glBindVertexArray(houseVao);
+
+            glm::mat4x4 houseModelMat = glm::translate(modelMat, glm::vec3(5.5, 0, 5.5));
+//            houseModelMat = glm::rotate(houseModelMat, glm::radians(270.0f), glm::vec3(0, 1, 0));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
+
             glBindBuffer(GL_ARRAY_BUFFER, houseVbo);
-            glDrawArrays(GL_TRIANGLES, 0, 72);
+            glBindTexture(GL_TEXTURE_2D, woodTexture);
+            glDrawArrays(GL_TRIANGLES, 0, 999); // TODO: 999 IS STUPID
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====

@@ -4,8 +4,7 @@ namespace wave {
 
     // the number of indices we want to define is given by
     // (num of strips) * (points per strip) + (number of primitive-return indices)
-    const int INDEX_COUNT =
-            (GRID_SIZE-1) * (GRID_SIZE*2) + (GRID_SIZE-2);
+    const int INDEX_COUNT = (GRID_SIZE-1) * (GRID_SIZE*2) + (GRID_SIZE-2);
 
     std::array<std::array<float, GRID_SIZE>, GRID_SIZE> heights = {0};
 
@@ -55,7 +54,7 @@ namespace wave {
     void generate_indices(int indices[]) {
 
         /**
-         * the sequence alternates -(gridsize-1), +gridsize applied to the previous value
+         * the sequence alternates [ -(gridsize-1), +gridsize ] applied to the previous value
          * if our position in the strip:
          *      is twice the grid size:
          *          we have hit the end of the strip
@@ -80,18 +79,17 @@ namespace wave {
             } else if (isEven) {
                 indices[i] = previous - (GRID_SIZE - 1);
                 previous = indices[i];
-                isEven = !isEven;
                 stripPosition++;
+                isEven = false;
             } else {
                 indices[i] = previous + GRID_SIZE;
                 previous = indices[i];
-                isEven = !isEven;
                 stripPosition++;
+                isEven = true;
             }
 
         }
 
     }
-
 
 }

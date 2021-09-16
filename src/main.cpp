@@ -12,6 +12,15 @@
  *      make a constructor which can take a specific point to look at
  */
 
+/**
+ * || CONTROLS ||
+ * WASD - lateral movement
+ * SPACE/LSHIFT - up/down
+ * Q - print location info
+ * E - toggle wireframe drawing
+ * TAB - release cursor
+ */
+
 int main() {
 
     GLFWwindow* window = nullptr;

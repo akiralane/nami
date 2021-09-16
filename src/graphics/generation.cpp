@@ -75,51 +75,53 @@ namespace graphics::generation {
         stbi_image_free(data);
     }
 
-    void buffer_cuboid(std::vector<float> &buffer, glm::vec3 offset, glm::vec3 scale) {
+    void buffer_cuboid(std::vector<float> &buffer, glm::vec3 scale, glm::vec3 offset) {
 
         // one 'group' per face
         std::vector<float> data = {
-                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 0.0f,
-                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      1.0f, 0.0f,
-                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
-                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
-                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, 0.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, scale.y,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, scale.y,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    scale.y,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
 
-                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 1.0f,
-                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 1.0f,
-                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f, 1.0f,
-                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,    0.0f,
+                scale.x + offset.x, 0       + offset.y,  scale.z + offset.z,       scale.x, 0.0f,
+                scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       scale.x, scale.y,
+                scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       scale.x, scale.y,
+                0       + offset.x, scale.y + offset.y,  scale.z + offset.z,       0.0f,    scale.y,
+                0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,    0.0f,
 
-                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
-                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, 0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
+                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
 
-                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
-                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, 0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
 
-                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                 scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
-                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                 scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                -scale.x + offset.x, -scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                -scale.x + offset.x, -scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
+                // TOP
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f, 1.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      1.0f, 1.0f,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f, 1.0f,
 
-                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f,
-                 scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      1.0f, 1.0f,
-                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                -scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                -scale.x + offset.x,  scale.y + offset.y, -scale.z + offset.z,      0.0f, 1.0f
+                // BOTTOM
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f, 1.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      1.0f, 1.0f,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f, 1.0f
         };
 
         buffer.insert(buffer.end(), data.begin(), data.end());
@@ -172,8 +174,26 @@ namespace graphics::generation {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         std::vector<float> buffer;
-        buffer_cuboid(buffer, glm::vec3(0, 0, 0), glm::vec3(3, 3, 3));
-        buffer_cuboid(buffer, glm::vec3(0, 0, 0), glm::vec3(1, 2, 6));
+
+        // world origin marker (TEMPORARY)
+        // remember that you've translated the house during the render loop
+        buffer_cuboid(buffer, glm::vec3(0.05, 100, 0.05), glm::vec3(-5.5, 0, -5.5));
+
+        // model axes markers (ALSO TEMPORARY)
+        buffer_cuboid(buffer, glm::vec3(100, 0.05, 0.05), glm::vec3(0, 0, 0));
+        buffer_cuboid(buffer, glm::vec3(0.05, 100, 0.05), glm::vec3(0, 0, 0));
+        buffer_cuboid(buffer, glm::vec3(0.05, 0.05, 100), glm::vec3(0, 0, 0));
+
+        // main platform
+        buffer_cuboid(buffer, glm::vec3(2.5, 0.1, 3.5), glm::vec3(0, 0.5, 0));
+
+        // main building body (needs a different texture - figure this out)
+        buffer_cuboid(buffer, glm::vec3(2, 1.3, 2.2), glm::vec3(0.3, 0.6, 0.5));
+
+        // jetty + supports
+        buffer_cuboid(buffer, glm::vec3(2, 0.1, 1.5), glm::vec3(-2, 0.5, 1));
+        buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 1.1));
+        buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 2.3));
 
         float data[buffer.size()];
         std::copy(buffer.begin(), buffer.end(), data);
