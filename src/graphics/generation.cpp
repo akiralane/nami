@@ -79,6 +79,8 @@ namespace graphics::generation {
 
         // one 'group' per face
         std::vector<float> data = {
+
+                // xy front
                 0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
                 scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, 0.0f,
                 scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, scale.y,
@@ -86,6 +88,7 @@ namespace graphics::generation {
                 0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    scale.y,
                 0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
 
+                // xy back
                 0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,    0.0f,
                 scale.x + offset.x, 0       + offset.y,  scale.z + offset.z,       scale.x, 0.0f,
                 scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       scale.x, scale.y,
@@ -93,35 +96,37 @@ namespace graphics::generation {
                 0       + offset.x, scale.y + offset.y,  scale.z + offset.z,       0.0f,    scale.y,
                 0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,    0.0f,
 
-                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, 0.0f,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
-                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
-                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
-
+                // yz front
                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
-                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, 0.0f,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, scale.y,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.z, 0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
                 scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
                 scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
 
+                // yz back
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.z, 0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
+                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
+
                 // TOP
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f, 1.0f,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      1.0f, 1.0f,
-                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f, 1.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, 0.0f,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      scale.x, scale.z,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      scale.x, scale.z,
+                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.z,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
 
                 // BOTTOM
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f, 1.0f,
-                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      1.0f, 1.0f,
-                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      1.0f, 0.0f,
-                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f, 0.0f,
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f, 1.0f
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    0.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, 0.0f,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      scale.x, scale.z,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      scale.x, scale.z,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    scale.z,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    0.0f
         };
 
         buffer.insert(buffer.end(), data.begin(), data.end());
