@@ -222,13 +222,14 @@ namespace graphics::core {
 
             glBindVertexArray(houseVao);
 
+//            glm::mat4x4 houseModelMat = glm::mat4(1.0f);
             glm::mat4x4 houseModelMat = glm::translate(modelMat, glm::vec3(5.5, 0, 5.5));
 //            houseModelMat = glm::rotate(houseModelMat, glm::radians(270.0f), glm::vec3(0, 1, 0));
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
 
             glBindBuffer(GL_ARRAY_BUFFER, houseVbo);
             glBindTexture(GL_TEXTURE_2D, woodTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 999); // TODO: 999 IS STUPID
+            glDrawArrays(GL_TRIANGLES, 0, 9999); // TODO: 9999 IS STUPID
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====
