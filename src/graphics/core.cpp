@@ -150,6 +150,11 @@ namespace graphics::core {
                 stdShader,
                 "..\\shaders\\simple.vert", "..\\shaders\\simple.frag");
 
+        unsigned int waveShader;
+        generation::generate_shader_program(
+                waveShader,
+                "..\\shaders\\simple.vert", "..\\shaders\\scrolling.frag");
+
         unsigned int backgroundShader;
         generation::generate_shader_program(
                 backgroundShader,
@@ -163,9 +168,12 @@ namespace graphics::core {
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
         generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
-        unsigned int houseVao, houseVbo, woodTexture;
+        unsigned int houseVao, houseVbo, woodTexture, supportTexture, frontTexture, roofTexture;
         generation::generate_house_model(houseVao, houseVbo);
-        generation::generate_texture(woodTexture, "..\\assets\\wood.bmp");
+        generation::generate_texture(woodTexture, "..\\assets\\wood_light.bmp");
+        generation::generate_texture(supportTexture, "..\\assets\\wood_dark.bmp");
+        generation::generate_texture(frontTexture, "..\\assets\\wood_dark.bmp");
+        generation::generate_texture(roofTexture, "..\\assets\\tiles.bmp");
 
         // ==== MVP matrices ====
 
@@ -191,23 +199,24 @@ namespace graphics::core {
 
             handleKeyInput(window, camera);
 
+            double time = glfwGetTime();
+
             // -------------------------------------------------------
             // ==== WAVES ====
 
             // generate and store the new sets of heights
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
-            wave::update_heights(float(glfwGetTime()));
+            wave::update_heights(float(time));
             std::vector<float> vecStream = wave::get_vector_stream();
             std::copy(vecStream.begin(), vecStream.end(), waveData);
 
             glBindVertexArray(waveVao);
 
-            // uniforms
-            // TODO: move code (up) to somewhere more intuitive
-            glUseProgram(stdShader);
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+            glUseProgram(waveShader);
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+            glUniform1f(glGetUniformLocation(waveShader, "time"), float(time/10));
 
             // texture
             glBindTexture(GL_TEXTURE_2D, waveTexture);
@@ -222,6 +231,12 @@ namespace graphics::core {
 
             glBindVertexArray(houseVao);
 
+            // uniforms
+            glUseProgram(stdShader);
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+
 //            glm::mat4x4 houseModelMat = glm::mat4(1.0f);
             glm::mat4x4 houseModelMat = glm::translate(modelMat, glm::vec3(5.5, 0, 5.5));
 //            houseModelMat = glm::rotate(houseModelMat, glm::radians(270.0f), glm::vec3(0, 1, 0));
@@ -229,7 +244,13 @@ namespace graphics::core {
 
             glBindBuffer(GL_ARRAY_BUFFER, houseVbo);
             glBindTexture(GL_TEXTURE_2D, woodTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 9999); // TODO: 9999 IS STUPID
+            glDrawArrays(GL_TRIANGLES, 0, 252);
+            glBindTexture(GL_TEXTURE_2D, supportTexture);
+            glDrawArrays(GL_TRIANGLES, 252, 72);
+            glBindTexture(GL_TEXTURE_2D, frontTexture);
+            glDrawArrays(GL_TRIANGLES, 324, 6);
+            glBindTexture(GL_TEXTURE_2D, roofTexture);
+            glDrawArrays(GL_TRIANGLES, 330, 500);
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====

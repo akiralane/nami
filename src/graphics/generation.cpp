@@ -189,24 +189,24 @@ namespace graphics::generation {
 //        buffer_cuboid(buffer, glm::vec3(0.05, 100, 0.05), glm::vec3(0, 0, 0));
 //        buffer_cuboid(buffer, glm::vec3(0.05, 0.05, 100), glm::vec3(0, 0, 0));
 
-        // main platform + supports
+        // main platform + supports [0+180]
         buffer_cuboid(buffer, glm::vec3(2.5, 0.1, 3.5), glm::vec3(0, 0.5, 0));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(0, -1.5, 0));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(0, -1.5, 3.2));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(2.2, -1.5, 3.2));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(2.2, -1.5, 0));
 
-        // main building body TODO: (needs a different texture - figure this out)
+        // main building body [180+36]
         buffer_cuboid(buffer, glm::vec3(2, 1.3, 2.2), glm::vec3(0.3, 0.6, 0.65));
 
-        // jetty + supports TODO: supports should have a different (darker?) texture also
+        // jetty + supports [216+108]
         buffer_cuboid(buffer, glm::vec3(2, 0.1, 1.5), glm::vec3(-2, 0.5, 1));
         buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 1.1));
         buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 2.3));
 
         const float ROOF_HEIGHT = 2.4; // TODO: temporary
 
-        // roof TODO: flip the triangles vertically so that the textures work
+        // roof [325-342]
         std::vector<float> roof = {
                 //front-facing triangle
                 0.3, 1.9, 0.65,            0,1,
@@ -217,20 +217,19 @@ namespace graphics::generation {
                 2.3, ROOF_HEIGHT, 1.75,    1,0,
                 2.3, 1.9, 2.85,            0,0,
                 //right-side rect
-                0.15, 1.741, 3.2,          1,0, // left triangle
+                0.15, 1.741, 3.2,          2,0, // left triangle
                 2.45, 1.741, 3.2,          0,0,
-                0.15, ROOF_HEIGHT, 1.75,   1,1,
-                0.15, ROOF_HEIGHT, 1.75,   1,1, // right triangle
-                2.45, ROOF_HEIGHT, 1.75,   0,1,
+                0.15, ROOF_HEIGHT, 1.75,   2,2,
+                0.15, ROOF_HEIGHT, 1.75,   2,2, // right triangle
+                2.45, ROOF_HEIGHT, 1.75,   0,2,
                 2.45, 1.741, 3.2,          0,0,
                 //left-side rect
-                0.15, ROOF_HEIGHT, 1.75,   1,1, // left triangle
-                2.45, ROOF_HEIGHT, 1.75,   0,1,
+                0.15, ROOF_HEIGHT, 1.75,   2,2, // left triangle
+                2.45, ROOF_HEIGHT, 1.75,   0,2,
                 2.45, 1.741, 0.3,          0,0,
-                0.15, 1.741, 0.3,          1,0, // right triangle
+                0.15, 1.741, 0.3,          2,0, // right triangle
                 2.45, 1.741, 0.3,          0,0,
-                0.15, ROOF_HEIGHT, 1.75,   1,1,
-
+                0.15, ROOF_HEIGHT, 1.75,   2,2,
         };
 
         buffer.insert(buffer.end(), roof.begin(), roof.end());
