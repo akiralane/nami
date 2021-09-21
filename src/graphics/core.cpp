@@ -168,11 +168,12 @@ namespace graphics::core {
         generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
         generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
-        unsigned int houseVao, houseVbo, woodTexture, supportTexture, frontTexture, roofTexture;
+        unsigned int houseVao, houseVbo;
+        unsigned int woodTexture, supportTexture, frontTexture, roofTexture;
         generation::generate_house_model(houseVao, houseVbo);
         generation::generate_texture(woodTexture, "..\\assets\\wood_light.bmp");
         generation::generate_texture(supportTexture, "..\\assets\\wood_dark.bmp");
-        generation::generate_texture(frontTexture, "..\\assets\\wood_dark.bmp");
+        generation::generate_texture(frontTexture, "..\\assets\\roof_front.bmp");
         generation::generate_texture(roofTexture, "..\\assets\\tiles.bmp");
 
         // ==== MVP matrices ====
@@ -237,16 +238,16 @@ namespace graphics::core {
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
-//            glm::mat4x4 houseModelMat = glm::mat4(1.0f);
             glm::mat4x4 houseModelMat = glm::translate(modelMat, glm::vec3(5.5, 0, 5.5));
-//            houseModelMat = glm::rotate(houseModelMat, glm::radians(270.0f), glm::vec3(0, 1, 0));
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
 
             glBindBuffer(GL_ARRAY_BUFFER, houseVbo);
+
+            // refer to the generation of the house mesh for the order of vertices
             glBindTexture(GL_TEXTURE_2D, woodTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 252);
+            glDrawArrays(GL_TRIANGLES, 0, 108);
             glBindTexture(GL_TEXTURE_2D, supportTexture);
-            glDrawArrays(GL_TRIANGLES, 252, 72);
+            glDrawArrays(GL_TRIANGLES, 108, 216);
             glBindTexture(GL_TEXTURE_2D, frontTexture);
             glDrawArrays(GL_TRIANGLES, 324, 6);
             glBindTexture(GL_TEXTURE_2D, roofTexture);
@@ -254,8 +255,8 @@ namespace graphics::core {
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====
-            // by rendering the background last, we reduce the number of fragments that the shader has to run on
-            // this does, however, mean we have to trick opengl into thinking the background is always at maximum depth
+            // by rendering the background last, we reduce the number of fragments that the shader has to run on.
+            // this does, however, mean we have to trick opengl into thinking the background is always at maximum depth.
             // this is done in the vertex shader, but in case anything is already at depth 1.0 we change the depth test condition here
             glDepthFunc(GL_LEQUAL);
 
@@ -276,11 +277,14 @@ namespace graphics::core {
 
             glDepthFunc(GL_LESS); // reset to normal
 
+            // -------------------------------------------------------
+            // ==== END OF LOOP ====
+
             int errorCode = glGetError();
             if (errorCode != 0) { std::cerr << "GL ERROR " << errorCode << std::endl; }
 
-            glfwSwapBuffers(window);
             glfwPollEvents();
+            glfwSwapBuffers(window);
 
         }
 

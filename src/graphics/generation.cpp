@@ -75,58 +75,65 @@ namespace graphics::generation {
         stbi_image_free(data);
     }
 
-    void buffer_cuboid(std::vector<float> &buffer, glm::vec3 scale, glm::vec3 offset) {
+    void buffer_cuboid(std::vector<float> &buffer, glm::vec3 scale, glm::vec3 offset, bool shouldTile) {
+
+        glm::vec3 texScale;
+        if (shouldTile) {
+            texScale = {scale.x, scale.y, scale.z};
+        } else {
+            texScale = {1.0f, 1.0f, 1.0f};
+        }
 
         // one 'group' per face
         std::vector<float> data = {
 
                 // xy front
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, 0.0f,
-                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, scale.y,
-                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, scale.y,
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    scale.y,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,       0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      texScale.x, 0.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      texScale.x, texScale.y,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      texScale.x, texScale.y,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,       texScale.y,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,       0.0f,
 
                 // xy back
-                0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,    0.0f,
-                scale.x + offset.x, 0       + offset.y,  scale.z + offset.z,       scale.x, 0.0f,
-                scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       scale.x, scale.y,
-                scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       scale.x, scale.y,
-                0       + offset.x, scale.y + offset.y,  scale.z + offset.z,       0.0f,    scale.y,
-                0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,    0.0f,
+                0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,       0.0f,
+                scale.x + offset.x, 0       + offset.y,  scale.z + offset.z,       texScale.x, 0.0f,
+                scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       texScale.x, texScale.y,
+                scale.x + offset.x, scale.y + offset.y,  scale.z + offset.z,       texScale.x, texScale.y,
+                0       + offset.x, scale.y + offset.y,  scale.z + offset.z,       0.0f,       texScale.y,
+                0       + offset.x, 0       + offset.y,  scale.z + offset.z,       0.0f,       0.0f,
 
                 // yz front
-                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
-                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.z, 0.0f,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
-                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
-                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,       0.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      texScale.z, 0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      texScale.z, texScale.y,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      texScale.z, texScale.y,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,       texScale.y,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,       0.0f,
 
                 // yz back
-                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.z, 0.0f,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      scale.z, scale.y,
-                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.y,
-                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    0.0f,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,       0.0f,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      texScale.z, 0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      texScale.z, texScale.y,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      texScale.z, texScale.y,
+                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,       texScale.y,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,       0.0f,
 
                 // TOP
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
-                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      scale.x, 0.0f,
-                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      scale.x, scale.z,
-                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      scale.x, scale.z,
-                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,    scale.z,
-                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,    0.0f,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,       0.0f,
+                scale.x + offset.x, 0        + offset.y, 0        + offset.z,      texScale.x, 0.0f,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      texScale.x, texScale.z,
+                scale.x + offset.x, 0        + offset.y,  scale.z + offset.z,      texScale.x, texScale.z,
+                0       + offset.x, 0        + offset.y,  scale.z + offset.z,      0.0f,       texScale.z,
+                0       + offset.x, 0        + offset.y, 0        + offset.z,      0.0f,       0.0f,
 
                 // BOTTOM
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    0.0f,
-                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      scale.x, 0.0f,
-                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      scale.x, scale.z,
-                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      scale.x, scale.z,
-                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,    scale.z,
-                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,    0.0f
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,       0.0f,
+                scale.x + offset.x,  scale.y + offset.y, 0        + offset.z,      texScale.x, 0.0f,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      texScale.x, texScale.z,
+                scale.x + offset.x,  scale.y + offset.y,  scale.z + offset.z,      texScale.x, texScale.z,
+                0       + offset.x,  scale.y + offset.y,  scale.z + offset.z,      0.0f,       texScale.z,
+                0       + offset.x,  scale.y + offset.y, 0        + offset.z,      0.0f,       0.0f
         };
 
         buffer.insert(buffer.end(), data.begin(), data.end());
@@ -180,42 +187,42 @@ namespace graphics::generation {
 
         std::vector<float> buffer;
 
-        // world origin marker (TEMPORARY)
-        // remember that you've translated the house during the render loop
-//        buffer_cuboid(buffer, glm::vec3(0.05, 100, 0.05), glm::vec3(-5.5, 0, -5.5));
-
         // model axes markers (ALSO TEMPORARY)
 //        buffer_cuboid(buffer, glm::vec3(100, 0.05, 0.05), glm::vec3(0, 0, 0));
 //        buffer_cuboid(buffer, glm::vec3(0.05, 100, 0.05), glm::vec3(0, 0, 0));
 //        buffer_cuboid(buffer, glm::vec3(0.05, 0.05, 100), glm::vec3(0, 0, 0));
 
-        // main platform + supports [0+180]
+        // main platform [0+36]
         buffer_cuboid(buffer, glm::vec3(2.5, 0.1, 3.5), glm::vec3(0, 0.5, 0));
+
+        // jetty platform [36+36]
+        buffer_cuboid(buffer, glm::vec3(2, 0.1, 1.5), glm::vec3(-2, 0.5, 1));
+
+        // main building body [72+36]
+        buffer_cuboid(buffer, glm::vec3(2, 1.3, 2.2), glm::vec3(0.3, 0.6, 0.65), false);
+
+        // main supports [108+144]
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(0, -1.5, 0));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(0, -1.5, 3.2));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(2.2, -1.5, 3.2));
         buffer_cuboid(buffer, glm::vec3(0.3, 2, 0.3), glm::vec3(2.2, -1.5, 0));
 
-        // main building body [180+36]
-        buffer_cuboid(buffer, glm::vec3(2, 1.3, 2.2), glm::vec3(0.3, 0.6, 0.65));
-
-        // jetty + supports [216+108]
-        buffer_cuboid(buffer, glm::vec3(2, 0.1, 1.5), glm::vec3(-2, 0.5, 1));
+        // jetty supports [252+72]
         buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 1.1));
         buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 2.3));
 
         const float ROOF_HEIGHT = 2.4; // TODO: temporary
 
-        // roof [325-342]
+        // roof [324+16]
         std::vector<float> roof = {
                 //front-facing triangle
-                0.3, 1.9, 0.65,            0,1,
-                0.3, ROOF_HEIGHT, 1.75,    1,0,
-                0.3, 1.9, 2.85,            0,0,
+                0.3, 1.9, 0.65,            0,0,
+                0.3, ROOF_HEIGHT, 1.75,    0,1,
+                0.3, 1.9, 2.85,            1,1,
                 //back-facing triangle
-                2.3, 1.9, 0.65,            0,1,
-                2.3, ROOF_HEIGHT, 1.75,    1,0,
-                2.3, 1.9, 2.85,            0,0,
+                2.3, 1.9, 0.65,            0,0,
+                2.3, ROOF_HEIGHT, 1.75,    0,1,
+                2.3, 1.9, 2.85,            1,1,
                 //right-side rect
                 0.15, 1.741, 3.2,          2,0, // left triangle
                 2.45, 1.741, 3.2,          0,0,
