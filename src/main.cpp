@@ -1,15 +1,11 @@
 #include "nami/graphics.h"
 
 /**
- * TODO: PROJECT
- *       - add audio
- *       - add the house
- *          plus a boat and a jetty - refer to dad's sketch
- */
-
-/**
- * TODO: CAMERA
- *      make a constructor which can take a specific point to look at
+ * TODO:
+ *  - audio
+ *  - smoke from chimney
+ *  - fade-in intro
+ *  - add some flowers...?
  */
 
 /**

@@ -187,11 +187,6 @@ namespace graphics::generation {
 
         std::vector<float> buffer;
 
-        // model axes markers (ALSO TEMPORARY)
-//        buffer_cuboid(buffer, glm::vec3(100, 0.05, 0.05), glm::vec3(0, 0, 0));
-//        buffer_cuboid(buffer, glm::vec3(0.05, 100, 0.05), glm::vec3(0, 0, 0));
-//        buffer_cuboid(buffer, glm::vec3(0.05, 0.05, 100), glm::vec3(0, 0, 0));
-
         // main platform [0+36]
         buffer_cuboid(buffer, glm::vec3(2.5, 0.1, 3.5), glm::vec3(0, 0.5, 0));
 
@@ -238,8 +233,10 @@ namespace graphics::generation {
                 2.45, 1.741, 0.3,          0,0,
                 0.15, ROOF_HEIGHT, 1.75,   2,2,
         };
-
         buffer.insert(buffer.end(), roof.begin(), roof.end());
+
+        // chimney
+        buffer_cuboid(buffer, glm::vec3(0.5, 1, 0.5), glm::vec3(1.1, 1.5, 2));
 
         float data[buffer.size()];
         std::copy(buffer.begin(), buffer.end(), data);

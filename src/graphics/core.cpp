@@ -169,12 +169,16 @@ namespace graphics::core {
         generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
         unsigned int houseVao, houseVbo;
-        unsigned int woodTexture, supportTexture, frontTexture, roofTexture;
+        unsigned int woodTexture, wallFrontTexture, wallSideTexture, supportTexture,
+                     roofFrontTexture, tilesTexture, stoneTexture;
         generation::generate_house_model(houseVao, houseVbo);
         generation::generate_texture(woodTexture, "..\\assets\\wood_light.bmp");
+        generation::generate_texture(wallFrontTexture, "..\\assets\\house_door.bmp");
+        generation::generate_texture(wallSideTexture, "..\\assets\\house_window.bmp");
         generation::generate_texture(supportTexture, "..\\assets\\wood_dark.bmp");
-        generation::generate_texture(frontTexture, "..\\assets\\roof_front.bmp");
-        generation::generate_texture(roofTexture, "..\\assets\\tiles.bmp");
+        generation::generate_texture(roofFrontTexture, "..\\assets\\roof_front.bmp");
+        generation::generate_texture(tilesTexture, "..\\assets\\tiles.bmp");
+        generation::generate_texture(stoneTexture, "..\\assets\\cobble.bmp");
 
         // ==== MVP matrices ====
 
@@ -245,19 +249,25 @@ namespace graphics::core {
 
             // refer to the generation of the house mesh for the order of vertices
             glBindTexture(GL_TEXTURE_2D, woodTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 108);
+            glDrawArrays(GL_TRIANGLES, 0, 72);
+            glBindTexture(GL_TEXTURE_2D, wallSideTexture);
+            glDrawArrays(GL_TRIANGLES, 72, 18);
+            glBindTexture(GL_TEXTURE_2D, wallFrontTexture);
+            glDrawArrays(GL_TRIANGLES, 90, 18);
             glBindTexture(GL_TEXTURE_2D, supportTexture);
             glDrawArrays(GL_TRIANGLES, 108, 216);
-            glBindTexture(GL_TEXTURE_2D, frontTexture);
+            glBindTexture(GL_TEXTURE_2D, roofFrontTexture);
             glDrawArrays(GL_TRIANGLES, 324, 6);
-            glBindTexture(GL_TEXTURE_2D, roofTexture);
-            glDrawArrays(GL_TRIANGLES, 330, 500);
+            glBindTexture(GL_TEXTURE_2D, tilesTexture);
+            glDrawArrays(GL_TRIANGLES, 330, 12);
+            glBindTexture(GL_TEXTURE_2D, stoneTexture);
+            glDrawArrays(GL_TRIANGLES, 336, 100);
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====
             // by rendering the background last, we reduce the number of fragments that the shader has to run on.
             // this does, however, mean we have to trick opengl into thinking the background is always at maximum depth.
-            // this is done in the vertex shader, but in case anything is already at depth 1.0 we change the depth test condition here
+            // this is done in its vertex shader, but in case anything is already at depth 1.0 we change the depth test condition here
             glDepthFunc(GL_LEQUAL);
 
             glBindVertexArray(backgroundVao);
