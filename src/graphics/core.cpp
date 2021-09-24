@@ -7,9 +7,9 @@
 const unsigned int DEFAULT_WINDOW_WIDTH = 800;
 const unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 
-Camera camera(glm::vec3(5, 1, 15), glm::vec3(0, 1, 0));
-
 namespace graphics::core {
+
+    Camera* camera;
 
     bool initialClick = true;
     double previousMouseX = DEFAULT_WINDOW_WIDTH / 2.0f;
@@ -31,9 +31,10 @@ namespace graphics::core {
             isWireframe = !isWireframe;
         }
 
-        void print_camera_pos() {
-            glm::vec3 position = camera.getPosition();
-            glm::vec2 rotation = camera.getRotation();
+        void print_camera_pos(GLFWwindow* window) {
+            auto camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+            glm::vec3 position = camera->getPosition();
+            glm::vec2 rotation = camera->getRotation();
             std::cout << "Camera is at world position ("
                       << position.x << ", " << position.y << ", " << position.z
                       << "): pitch " << rotation.x << ", yaw " << rotation.y
@@ -78,7 +79,7 @@ namespace graphics::core {
                         windowHasFocus = false;
                         break;
                     case GLFW_KEY_Q:
-                        print_camera_pos();
+                        print_camera_pos(window);
                         break;
                     default:
                         break;
@@ -100,7 +101,8 @@ namespace graphics::core {
             previousMouseY = y;
 
             if (windowHasFocus) {
-                camera.look(xDifference, yDifference);
+                auto camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+                camera->look(xDifference, yDifference);
             }
         }
 
@@ -118,6 +120,14 @@ namespace graphics::core {
                 DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT,
                 "波", nullptr, nullptr
         );
+
+        // by setting the camera object as our windowUserPointer, we can retrieve it
+        // in the glfw callbacks where we would have otherwise needed to make it global
+        camera = new Camera(
+                glm::vec3(0, 1.7, 0), glm::vec3(0, 0, -1),
+                glm::vec3(0, 1, 0), 46, -6
+        );
+        glfwSetWindowUserPointer(window, camera);
 
         glfwSetKeyCallback(window, key_callback); // receive input
         glfwSetErrorCallback(error_callback); // report errors
@@ -143,7 +153,7 @@ namespace graphics::core {
 
     void start_render_loop(GLFWwindow* window) {
 
-        // ==== shaders, buffers etc. ====
+        // ==== shaders, buffers, textures ====
 
         unsigned int stdShader;
         generation::generate_shader_program(
@@ -169,25 +179,20 @@ namespace graphics::core {
         generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
         unsigned int houseVao, houseVbo;
-        unsigned int woodTexture, wallFrontTexture, wallSideTexture, supportTexture,
+        unsigned int woodTexture, wallFrontTexture, wallSideTexture, darkWoodTexture,
                      roofFrontTexture, tilesTexture, stoneTexture;
         generation::generate_house_model(houseVao, houseVbo);
         generation::generate_texture(woodTexture, "..\\assets\\wood_light.bmp");
         generation::generate_texture(wallFrontTexture, "..\\assets\\house_door.bmp");
         generation::generate_texture(wallSideTexture, "..\\assets\\house_window.bmp");
-        generation::generate_texture(supportTexture, "..\\assets\\wood_dark.bmp");
+        generation::generate_texture(darkWoodTexture, "..\\assets\\wood_dark.bmp");
         generation::generate_texture(roofFrontTexture, "..\\assets\\roof_front.bmp");
         generation::generate_texture(tilesTexture, "..\\assets\\tiles.bmp");
         generation::generate_texture(stoneTexture, "..\\assets\\cobble.bmp");
 
-        // ==== MVP matrices ====
+        // ==== common matrix declaration ====
 
-        // a model matrix transforms the object's vertices into the world space
-        glm::mat4 modelMat = glm::mat4(1.0f);
-
-        // the view matrix transforms the camera
-        // (this is unused - the camera class generates the view matrix now)
-        glm::mat4 viewMat = glm::mat4(1.0f);
+        glm::mat4 identity = glm::mat4(1.0f);
 
         // the projection matrix determines the perspective + fov
         glm::mat4 projectionMat;
@@ -202,7 +207,7 @@ namespace graphics::core {
             glClearColor(0.2, 0.3, 0.3, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            handleKeyInput(window, camera);
+            handleKeyInput(window, *camera);
 
             double time = glfwGetTime();
 
@@ -218,8 +223,8 @@ namespace graphics::core {
             glBindVertexArray(waveVao);
 
             glUseProgram(waveShader);
-            glUniformMatrix4fv(glGetUniformLocation(waveShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
-            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+            glUniformMatrix4fv(glGetUniformLocation(waveShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
             glUniformMatrix4fv(glGetUniformLocation(waveShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
             glUniform1f(glGetUniformLocation(waveShader, "time"), float(time/10));
 
@@ -238,30 +243,31 @@ namespace graphics::core {
 
             // uniforms
             glUseProgram(stdShader);
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(glm::vec4(1.0f)));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
-            glm::mat4x4 houseModelMat = glm::translate(modelMat, glm::vec3(5.5, 0, 5.5));
+            glm::mat4x4 houseModelMat = glm::translate(glm::mat4(1), glm::vec3(10, 0, 8));
+            houseModelMat = glm::rotate(houseModelMat, glm::radians(-90.0f), glm::vec3(0, 1, 0));
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
 
-            glBindBuffer(GL_ARRAY_BUFFER, houseVbo);
-
             // refer to the generation of the house mesh for the order of vertices
+            // this is such a dumb system - write wrapper functions next time
+            // better yet, don't manually write hundreds of vertices and just import a model instead
             glBindTexture(GL_TEXTURE_2D, woodTexture);
             glDrawArrays(GL_TRIANGLES, 0, 72);
             glBindTexture(GL_TEXTURE_2D, wallSideTexture);
             glDrawArrays(GL_TRIANGLES, 72, 18);
             glBindTexture(GL_TEXTURE_2D, wallFrontTexture);
             glDrawArrays(GL_TRIANGLES, 90, 18);
-            glBindTexture(GL_TEXTURE_2D, supportTexture);
-            glDrawArrays(GL_TRIANGLES, 108, 216);
+            glBindTexture(GL_TEXTURE_2D, darkWoodTexture);
+            glDrawArrays(GL_TRIANGLES, 108, 252);
             glBindTexture(GL_TEXTURE_2D, roofFrontTexture);
-            glDrawArrays(GL_TRIANGLES, 324, 6);
+            glDrawArrays(GL_TRIANGLES, 360, 6);
             glBindTexture(GL_TEXTURE_2D, tilesTexture);
-            glDrawArrays(GL_TRIANGLES, 330, 12);
+            glDrawArrays(GL_TRIANGLES, 366, 12);
             glBindTexture(GL_TEXTURE_2D, stoneTexture);
-            glDrawArrays(GL_TRIANGLES, 336, 100);
+            glDrawArrays(GL_TRIANGLES, 378, 100);
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====
@@ -282,7 +288,6 @@ namespace graphics::core {
             glBindTexture(GL_TEXTURE_2D, backgroundTexture);
 
             // drawing
-            glBindBuffer(GL_ARRAY_BUFFER, backgroundVbo);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             glDepthFunc(GL_LESS); // reset to normal

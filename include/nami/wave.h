@@ -11,7 +11,7 @@ namespace wave {
     // ==== settings ====
 
     const float SPACING = 1.0; // distance between each vertex in a row
-    static const int GRID_SIZE = 16; // number of rows and columns
+    static const int GRID_SIZE = 20; // number of rows and columns
 
     const float WAVELENGTH = 1.2;
     const float AMPLITUDE = 0.15;

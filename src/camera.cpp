@@ -1,10 +1,26 @@
 #include "nami/camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 worldUp) : front(glm::vec3(0, 0, -1)), yaw(-90), pitch(0) {
-    this->position = position;
-    this->worldUp = worldUp;
+Camera::Camera() :
+    position(glm::vec3(5, 1, 15)),
+    front(glm::vec3(0, 0, -1)),
+    worldUp(glm::vec3(0, 1, 0)),
+    yaw(-90),
+    pitch(0)
+{
     right = glm::normalize(glm::cross(front, worldUp));
     up = glm::normalize(glm::cross(right, front));
+    look(0, 0);
+}
+
+Camera::Camera(glm::vec3 position, glm::vec3 front, glm::vec3 worldUp, float yaw, float pitch) {
+    this->position = position;
+    this->front = front;
+    this->worldUp = worldUp;
+    this->yaw = yaw;
+    this->pitch = pitch;
+    right = glm::normalize(glm::cross(front, worldUp));
+    up = glm::normalize(glm::cross(right, front));
+    look(0, 0);
 }
 
 void Camera::move(Direction direction) {

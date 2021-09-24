@@ -28,7 +28,8 @@ public:
     float yaw;
     float pitch;
 
-    Camera(glm::vec3 position, glm::vec3 worldUp);
+    Camera();
+    Camera(glm::vec3 position, glm::vec3 front, glm::vec3 up, float yaw, float pitch);
 
     void move(Direction direction);
     void look(float deltaX, float deltaY);

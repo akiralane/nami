@@ -206,9 +206,12 @@ namespace graphics::generation {
         buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 1.1));
         buffer_cuboid(buffer, glm::vec3(0.1, 1.3, 0.1), glm::vec3(-1.9, -0.5, 2.3));
 
-        const float ROOF_HEIGHT = 2.4; // TODO: temporary
+        // windowsill [324+36]
+        buffer_cuboid(buffer, glm::vec3(0.52, 0.1, 0.07), glm::vec3(1.04, 0.89, 2.85));
 
-        // roof [324+16]
+        const float ROOF_HEIGHT = 2.4;
+
+        // roof [360+16]
         std::vector<float> roof = {
                 //front-facing triangle
                 0.3, 1.9, 0.65,            0,0,
@@ -235,7 +238,7 @@ namespace graphics::generation {
         };
         buffer.insert(buffer.end(), roof.begin(), roof.end());
 
-        // chimney
+        // chimney [376+32]
         buffer_cuboid(buffer, glm::vec3(0.5, 1, 0.5), glm::vec3(1.1, 1.5, 2));
 
         float data[buffer.size()];

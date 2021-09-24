@@ -9,10 +9,10 @@
  */
 
 /**
- * || CONTROLS ||
+ * ==== CONTROLS ====
  * WASD - lateral movement
  * SPACE/LSHIFT - up/down
- * Q - print location info
+ * Q - print camera location info
  * E - toggle wireframe drawing
  * TAB - release cursor
  */
