@@ -39,7 +39,7 @@ namespace wave {
      * Each vertex is of the form (x,y,z)(t_0,t_1).
      * @return the 'vector stream' which the VBO wants
      */
-    std::vector<float> get_vector_stream();
+    std::vector<float> get_vertex_stream();
 
     /**
      * Generates the order in which indexed drawing should take place.

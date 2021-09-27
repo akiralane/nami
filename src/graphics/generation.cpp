@@ -146,8 +146,8 @@ namespace graphics::generation {
         wave::update_heights(0);
 
         float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
-        std::vector<float> vecStream = wave::get_vector_stream();
-        std::copy(vecStream.begin(), vecStream.end(), waveData); // seems expensive
+        std::vector<float> vertexStream = wave::get_vertex_stream();
+        std::copy(vertexStream.begin(), vertexStream.end(), waveData); // seems expensive
 
         // indexed drawing - the triangles have some overlapping vertices,
         // so we can tell OpenGL to pick the existing vertices that we want instead of writing them out again.
@@ -252,7 +252,27 @@ namespace graphics::generation {
         glEnableVertexAttribArray(1);
     }
 
-    void generate_background_model(unsigned int &vao, unsigned int &vbo, unsigned int &ibo) {
+    void generate_smoke_model(unsigned int &vao, unsigned int &vbo) {
+
+        glBindVertexArray(0);
+
+        // initial population
+        smoke::update(0);
+
+        float data[smoke::LENGTH * 2 * 3];
+        std::vector<float> vertexStream = smoke::get_vertex_stream();
+        std::copy(vertexStream.begin(), vertexStream.end(), data);
+
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_DYNAMIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    }
+
+    void generate_background_model(unsigned int &vao, unsigned int &vbo) {
 
         float data[] = {
                 -1, -1, 0,  0,0,
@@ -268,7 +288,6 @@ namespace graphics::generation {
         glBindVertexArray(vao);
 
         glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ibo);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);

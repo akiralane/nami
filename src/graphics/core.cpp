@@ -129,7 +129,7 @@ namespace graphics::core {
         );
         glfwSetWindowUserPointer(window, camera);
 
-        glfwSetKeyCallback(window, key_callback); // receive input
+        glfwSetKeyCallback(window, key_callback); // receive keydown input (not presses!)
         glfwSetErrorCallback(error_callback); // report errors
         glfwSetMouseButtonCallback(window, mouse_button_callback);
         glfwSetCursorPosCallback(window, cursor_pos_callback);
@@ -148,6 +148,8 @@ namespace graphics::core {
         gladLoadGL();
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     }
 
@@ -165,6 +167,11 @@ namespace graphics::core {
                 waveShader,
                 "..\\shaders\\simple.vert", "..\\shaders\\scrolling.frag");
 
+        unsigned int smokeShader;
+        generation::generate_shader_program(
+                smokeShader,
+                "..\\shaders\\smoke.vert", "..\\shaders\\smoke.frag");
+
         unsigned int backgroundShader;
         generation::generate_shader_program(
                 backgroundShader,
@@ -174,13 +181,9 @@ namespace graphics::core {
         generation::generate_wave_model(waveVao, waveVbo, waveIbo);
         generation::generate_texture(waveTexture, "..\\assets\\water.bmp");
 
-        unsigned int backgroundVao, backgroundVbo, backgroundIbo, backgroundTexture;
-        generation::generate_background_model(backgroundVao, backgroundVbo, backgroundIbo);
-        generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
-
         unsigned int houseVao, houseVbo;
         unsigned int woodTexture, wallFrontTexture, wallSideTexture, darkWoodTexture,
-                     roofFrontTexture, tilesTexture, stoneTexture;
+                roofFrontTexture, tilesTexture, stoneTexture;
         generation::generate_house_model(houseVao, houseVbo);
         generation::generate_texture(woodTexture, "..\\assets\\wood_light.bmp");
         generation::generate_texture(wallFrontTexture, "..\\assets\\house_door.bmp");
@@ -189,6 +192,13 @@ namespace graphics::core {
         generation::generate_texture(roofFrontTexture, "..\\assets\\roof_front.bmp");
         generation::generate_texture(tilesTexture, "..\\assets\\tiles.bmp");
         generation::generate_texture(stoneTexture, "..\\assets\\cobble.bmp");
+
+        unsigned int smokeVao, smokeVbo;
+        generation::generate_smoke_model(smokeVao, smokeVbo);
+
+        unsigned int backgroundVao, backgroundVbo, backgroundTexture;
+        generation::generate_background_model(backgroundVao, backgroundVbo);
+        generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
 
         // ==== common matrix declaration ====
 
@@ -217,8 +227,8 @@ namespace graphics::core {
             // generate and store the new sets of heights
             float waveData[wave::GRID_SIZE * wave::GRID_SIZE * 5];
             wave::update_heights(float(time));
-            std::vector<float> vecStream = wave::get_vector_stream();
-            std::copy(vecStream.begin(), vecStream.end(), waveData);
+            std::vector<float> waveVertexStream = wave::get_vertex_stream();
+            std::copy(waveVertexStream.begin(), waveVertexStream.end(), waveData);
 
             glBindVertexArray(waveVao);
 
@@ -243,13 +253,13 @@ namespace graphics::core {
 
             // uniforms
             glUseProgram(stdShader);
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(glm::vec4(1.0f)));
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
-            glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
             glm::mat4x4 houseModelMat = glm::translate(glm::mat4(1), glm::vec3(10, 0, 8));
             houseModelMat = glm::rotate(houseModelMat, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
             glUniformMatrix4fv(glGetUniformLocation(stdShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(stdShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
             // refer to the generation of the house mesh for the order of vertices
             // this is such a dumb system - write wrapper functions next time
@@ -267,7 +277,26 @@ namespace graphics::core {
             glBindTexture(GL_TEXTURE_2D, tilesTexture);
             glDrawArrays(GL_TRIANGLES, 366, 12);
             glBindTexture(GL_TEXTURE_2D, stoneTexture);
-            glDrawArrays(GL_TRIANGLES, 378, 100);
+            glDrawArrays(GL_TRIANGLES, 378, 36);
+
+            // -------------------------------------------------------
+            // ==== SMOKE ====
+
+            glBindVertexArray(0);
+
+            float smokeData[smoke::LENGTH*2*3];
+//            smoke::update(0);
+            std::vector<float> smokeVertexStream = smoke::get_vertex_stream();
+            std::copy(smokeVertexStream.begin(), smokeVertexStream.end(), smokeData);
+
+            glUseProgram(smokeShader);
+            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
+            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+            glBindBuffer(GL_ARRAY_BUFFER, smokeVbo);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(smokeData), smokeData);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
             // -------------------------------------------------------
             // ==== BACKGROUND ====

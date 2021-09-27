@@ -13,6 +13,7 @@ include_directories(${PROJECT_SOURCE_DIR}/deps)
 add_executable(nami
         src/main.cpp
         src/wave.cpp
+        src/smoke.cpp
         src/graphics/core.cpp
         src/graphics/generation.cpp
         src/camera.cpp
