@@ -123,6 +123,7 @@ namespace graphics::core {
 
         // by setting the camera object as our windowUserPointer, we can retrieve it
         // in the glfw callbacks where we would have otherwise needed to make it global
+        // try (-1.35418, 2.47308, 1.71069) pitch -1.3, yaw 35.9004
         camera = new Camera(
                 glm::vec3(0, 1.7, 0), glm::vec3(0, 0, -1),
                 glm::vec3(0, 1, 0), 46, -6
@@ -280,27 +281,8 @@ namespace graphics::core {
             glDrawArrays(GL_TRIANGLES, 378, 36);
 
             // -------------------------------------------------------
-            // ==== SMOKE ====
-
-            glBindVertexArray(0);
-
-            float smokeData[smoke::LENGTH*2*3];
-//            smoke::update(0);
-            std::vector<float> smokeVertexStream = smoke::get_vertex_stream();
-            std::copy(smokeVertexStream.begin(), smokeVertexStream.end(), smokeData);
-
-            glUseProgram(smokeShader);
-            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(houseModelMat));
-            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
-            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
-
-            glBindBuffer(GL_ARRAY_BUFFER, smokeVbo);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(smokeData), smokeData);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
-
-            // -------------------------------------------------------
             // ==== BACKGROUND ====
-            // by rendering the background last, we reduce the number of fragments that the shader has to run on.
+            // by rendering the background as late as we can, we reduce the number of fragments that the shader has to run on.
             // this does, however, mean we have to trick opengl into thinking the background is always at maximum depth.
             // this is done in its vertex shader, but in case anything is already at depth 1.0 we change the depth test condition here
             glDepthFunc(GL_LEQUAL);
@@ -320,6 +302,31 @@ namespace graphics::core {
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             glDepthFunc(GL_LESS); // reset to normal
+
+            // -------------------------------------------------------
+            // ==== SMOKE ====
+            // we draw the smoke after the background because the transparency fails otherwise
+
+            glBindVertexArray(0);
+
+            // generation
+            float smokeData[smoke::POINTS_HEIGHT * 2 * 3];
+            smoke::update(float(time));
+            std::vector<float> smokeVertexStream = smoke::get_vertex_stream();
+            std::copy(smokeVertexStream.begin(), smokeVertexStream.end(), smokeData);
+
+            // uniforms
+            glUseProgram(smokeShader);
+            glm::mat4 smokeModelMat = glm::translate(houseModelMat, glm::vec3(1.2f, 2.5f, 2.1f));
+            smokeModelMat = glm::rotate(smokeModelMat, glm::radians(-45.0f), glm::vec3(0, 1, 0));
+            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "modelMat"), 1, GL_FALSE, glm::value_ptr(smokeModelMat));
+            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "viewMat"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+            glUniformMatrix4fv(glGetUniformLocation(smokeShader, "projectionMat"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+            // drawing
+            glBindBuffer(GL_ARRAY_BUFFER, smokeVbo);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(smokeData), smokeData);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
 
             // -------------------------------------------------------
             // ==== END OF LOOP ====

@@ -1,32 +1,29 @@
 #include "nami/smoke.h"
 
-namespace smoke {
-
-    std::vector<std::array<float, 3>> points;
-
-}
+std::vector<std::array<float, 3>> smoke::points;
 
 void smoke::update(float offset) {
 
-    float signal[LENGTH];
-    points = {};
+    points = {}; // clear old points
 
-    for (int i = 0; i < LENGTH; ++i) {
+    // generate signal
+    // we make the array one larger because we've offset the right side's wave by adding 1 to its index
+    float signal[POINTS_HEIGHT+1];
+    for (int i = 0; i < POINTS_HEIGHT+1; ++i) {
         signal[i] = float(
                 sin( (1/WAVELENGTH)*(i*M_PI/2) + (offset*SPEED) ) * AMPLITUDE
         );
     }
 
-    for (int i = 0; i < LENGTH*2; ++i) {
-        if (i%2 == 0) {
-            points.push_back(
-                    std::array<float, 3> {float(i)/2, float(i), 0}
-            );
-        } else {
-            points.push_back(
-                    std::array<float, 3> {float(-i)/2, float(i), 0}
-            );
-        }
+    // create and push the points
+    for (int i = 0; i < POINTS_HEIGHT; ++i) {
+        points.push_back(
+                std::array<float, 3>{signal[i], float(i), 0}
+        );
+        points.push_back(
+                std::array<float, 3>{signal[i+1] + WIDTH, float(i), 0}
+        );
+
     }
 
 }
@@ -38,7 +35,6 @@ std::vector<float> smoke::get_vertex_stream() {
     for (auto point : points) {
         vertexStream.insert(end(vertexStream), begin(point), end(point));
     }
-
 
     return vertexStream;
 

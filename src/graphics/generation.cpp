@@ -259,7 +259,7 @@ namespace graphics::generation {
         // initial population
         smoke::update(0);
 
-        float data[smoke::LENGTH * 2 * 3];
+        float data[smoke::POINTS_HEIGHT * 2 * 3];
         std::vector<float> vertexStream = smoke::get_vertex_stream();
         std::copy(vertexStream.begin(), vertexStream.end(), data);
 
