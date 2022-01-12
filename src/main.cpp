@@ -3,14 +3,7 @@
 /**
  * TODO | ADD:
  *  - audio
- *  - smoke from chimney
  *  - fade-in intro
- *  - add some flowers...?
- */
-
-/**
- * TODO | FIX:
- *  - smoke implementation
  */
 
 /**

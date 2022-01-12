@@ -17,18 +17,18 @@ namespace graphics::core {
 
     namespace {
 
-        bool isWireframe = false;
+        bool wireframe = false;
         bool windowHasFocus = true;
 
         // ==== util functions ====
 
         void toggle_wireframe() {
-            if (isWireframe) {
+            if (wireframe) {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             } else {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
-            isWireframe = !isWireframe;
+            wireframe = !wireframe;
         }
 
         void print_camera_pos(GLFWwindow* window) {
@@ -125,12 +125,12 @@ namespace graphics::core {
         // in the glfw callbacks where we would have otherwise needed to make it global
         // try (-1.35418, 2.47308, 1.71069) pitch -1.3, yaw 35.9004
         camera = new Camera(
-                glm::vec3(0, 1.7, 0), glm::vec3(0, 0, -1),
-                glm::vec3(0, 1, 0), 46, -6
+                glm::vec3(1.5, 1.7, 1.5), glm::vec3(0, 0, -1),
+                glm::vec3(0, 1, 0), 47, 2.19975
         );
         glfwSetWindowUserPointer(window, camera);
 
-        glfwSetKeyCallback(window, key_callback); // receive keydown input (not presses!)
+        glfwSetKeyCallback(window, key_callback); // receive key-downs (not presses!)
         glfwSetErrorCallback(error_callback); // report errors
         glfwSetMouseButtonCallback(window, mouse_button_callback);
         glfwSetCursorPosCallback(window, cursor_pos_callback);
@@ -199,7 +199,7 @@ namespace graphics::core {
 
         unsigned int backgroundVao, backgroundVbo, backgroundTexture;
         generation::generate_background_model(backgroundVao, backgroundVbo);
-        generation::generate_texture(backgroundTexture, "..\\assets\\clouds.bmp");
+        generation::generate_texture(backgroundTexture, "..\\assets\\night_sky.bmp");
 
         // ==== common matrix declaration ====
 
